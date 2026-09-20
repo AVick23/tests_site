@@ -3,991 +3,1688 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Практическая работа №1 — Тестирование в Python (Head First Style)</title>
-
-<!-- Подключаем рукописные и веселые шрифты от Google -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,400&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-
+<title>Тестирование и автоматизация на Python — курс</title>
 <style>
-/* =========================================
-   1. GLOBAL RESET & VARIABLES
-   ========================================= */
-:root {
-  --bg-paper: #fdf6e3;
-  --bg-card: #ffffff;
-  --ink-black: #2b2b2b;
-  --accent-red: #e74c3c;
-  --accent-blue: #2980b9;
-  --accent-yellow: #f1c40f;
-  --accent-green: #27ae60;
-  --accent-purple: #9b59b6;
-  --accent-orange: #e67e22;
-  
-  --font-hand: 'Caveat', cursive;
-  --font-body: 'Comic Neue', 'Comic Sans MS', sans-serif;
-  --font-code: 'Fira Code', monospace;
-  
-  --slide-max-width: 1000px;
-  --spacing-section: 80px;
-}
+    /* ===== БАЗА ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
+    body {
+        font-family: "Comic Sans MS", "Segoe UI", Arial, sans-serif;
+        background: #fdf6e3;
+        color: #1a1a2e;
+        line-height: 1.7;
+        padding-bottom: 80px;
+    }
 
-body {
-  font-family: var(--font-body);
-  background-color: var(--bg-paper);
-  background-image: 
-    radial-gradient(#e0d6c2 1px, transparent 1px),
-    radial-gradient(#e0d6c2 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
-  color: var(--ink-black);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+    /* ===== ЛИПКАЯ ШАПКА ===== */
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(26, 26, 46, 0.97);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 20px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
 
-/* Скроллбар в стиле Head First */
-::-webkit-scrollbar { width: 12px; }
-::-webkit-scrollbar-track { background: var(--bg-paper); border-left: 2px solid #ddd; }
-::-webkit-scrollbar-thumb { 
-  background: var(--accent-blue); 
-  border-radius: 10px; 
-  border: 2px solid var(--bg-paper);
-}
-::-webkit-scrollbar-thumb:hover { background: var(--accent-red); }
+    .topbar .logo {
+        font-weight: bold;
+        font-size: 1.05em;
+        color: #f0c929;
+        white-space: nowrap;
+        text-decoration: none;
+    }
 
-/* =========================================
-   2. LAYOUT & NAVIGATION
-   ========================================= */
-.main-container {
-  max-width: var(--slide-max-width);
-  margin: 0 auto;
-  padding: 40px 20px 100px 20px;
-  position: relative;
-  z-index: 1;
-}
+    .topbar .menu-btn {
+        background: transparent;
+        border: 2px solid #f0c929;
+        color: #f0c929;
+        font-size: 1.2em;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
 
-/* Боковое меню навигации */
-.side-nav {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: rgba(255,255,255,0.9);
-  padding: 15px 10px;
-  border-radius: 30px;
-  border: 3px solid var(--ink-black);
-  box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
-  transition: opacity 0.3s;
-}
+    .topbar .menu-btn:hover { background: rgba(240, 201, 41, 0.15); }
 
-.nav-dot {
-  width: 12px;
-  height: 12px;
-  background: #ccc;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
-}
+    .topbar .topnav {
+        display: flex;
+        gap: 6px;
+        flex: 1;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
 
-.nav-dot:hover, .nav-dot.active {
-  background: var(--accent-red);
-  transform: scale(1.4);
-}
+    .topbar .topnav::-webkit-scrollbar { display: none; }
 
-.nav-dot::after {
-  content: attr(data-title);
-  position: absolute;
-  right: 25px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--ink-black);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-  font-family: var(--font-hand);
-  font-size: 1.2rem;
-}
+    .topbar .topnav a {
+        color: #cbd5e1;
+        text-decoration: none;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        white-space: nowrap;
+        transition: background 0.2s, color 0.2s;
+    }
 
-.nav-dot:hover::after { opacity: 1; }
+    .topbar .topnav a:hover,
+    .topbar .topnav a.active {
+        background: #e94560;
+        color: #fff;
+    }
 
-@media (max-width: 1200px) {
-  .side-nav { display: none; } /* Скрываем на маленьких экранах */
-}
+    .topbar .continue-btn {
+        background: #f0c929;
+        color: #1a1a2e;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85em;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: inherit;
+        transition: transform 0.2s;
+        display: none;
+    }
 
-/* Кнопка полного экрана */
-.fs-toggle {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 1001;
-  background: var(--accent-green);
-  color: white;
-  border: 3px solid var(--ink-black);
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 4px 4px 0 var(--ink-black);
-  transition: transform 0.1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.fs-toggle:active { transform: translate(4px, 4px); box-shadow: none; }
+    .topbar .continue-btn:hover { transform: scale(1.05); }
 
-/* Прогресс бар сверху */
-.progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 8px;
-  background: var(--accent-red);
-  width: 0%;
-  z-index: 1002;
-  transition: width 0.1s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
+    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -340px;
+        width: 320px;
+        height: 100vh;
+        background: #1a1a2e;
+        color: #fff;
+        padding: 25px 20px;
+        z-index: 200;
+        overflow-y: auto;
+        transition: left 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+    }
 
-/* =========================================
-   3. SLIDE / CARD STYLES
-   ========================================= */
-.slide-section {
-  min-height: 80vh; /* Каждый блок занимает почти весь экран */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-bottom: var(--spacing-section);
-  opacity: 0;
-  transform: translateY(50px);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
-}
+    .sidebar.open { left: 0; }
 
-.slide-section.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+    .sidebar h3 {
+        color: #f0c929;
+        font-size: 1.2em;
+        margin-bottom: 18px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e94560;
+    }
 
-.card {
-  background: var(--bg-card);
-  border: 4px solid var(--ink-black);
-  border-radius: 25px;
-  padding: 50px;
-  position: relative;
-  box-shadow: 12px 12px 0 rgba(0,0,0,0.15);
-  overflow: visible; /* Для декораций, торчащих наружу */
-}
+    .sidebar .side-section {
+        margin-bottom: 22px;
+    }
 
-/* Декоративная рамка (пунктир) */
-.card::before {
-  content: '';
-  position: absolute;
-  top: -10px; left: -10px; right: -10px; bottom: -10px;
-  border: 3px dashed var(--accent-red);
-  border-radius: 30px;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.6;
-}
+    .sidebar .side-section h4 {
+        color: #94a3b8;
+        font-size: 0.78em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
 
-/* Номер слайда */
-.slide-number {
-  position: absolute;
-  top: -25px;
-  left: 40px;
-  background: var(--accent-yellow);
-  color: var(--ink-black);
-  font-family: var(--font-hand);
-  font-size: 2rem;
-  font-weight: bold;
-  padding: 5px 20px;
-  border: 3px solid var(--ink-black);
-  border-radius: 15px;
-  transform: rotate(-3deg);
-  box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
-}
+    .sidebar .side-section a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #e2e8f0;
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.9em;
+        margin-bottom: 2px;
+        transition: background 0.2s, padding-left 0.2s;
+        position: relative;
+    }
 
-/* =========================================
-   4. TYPOGRAPHY & ELEMENTS
-   ========================================= */
-h1 {
-  font-family: var(--font-hand);
-  font-size: 4.5rem;
-  line-height: 1.1;
-  color: var(--accent-red);
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  text-shadow: 3px 3px 0 var(--accent-yellow);
-  transform: rotate(-1deg);
-}
+    .sidebar .side-section a:hover {
+        background: #0f3460;
+        padding-left: 18px;
+    }
 
-h2 {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 2.8rem;
-  color: var(--accent-blue);
-  margin-bottom: 30px;
-  border-bottom: 4px solid var(--accent-yellow);
-  display: inline-block;
-  padding-bottom: 5px;
-  transform: rotate(0.5deg);
-}
+    .sidebar .side-section a.active {
+        background: #e94560;
+        color: #fff;
+        font-weight: bold;
+    }
 
-p { font-size: 1.4rem; margin-bottom: 20px; }
+    .sidebar .side-section a .badge-mini {
+        font-size: 0.7em;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: auto;
+        font-weight: bold;
+        white-space: nowrap;
+    }
 
-ul { list-style: none; margin-bottom: 20px; }
-li { 
-  font-size: 1.4rem; 
-  margin-bottom: 12px; 
-  padding-left: 40px; 
-  position: relative; 
-}
-li::before {
-  content: "👉";
-  position: absolute;
-  left: 0;
-  font-size: 1.5rem;
-  animation: point 1s infinite alternate;
-}
-@keyframes point { from { transform: translateX(0); } to { transform: translateX(5px); } }
+    .sidebar .side-section a .badge-mini.done { background: #2ecc71; color: #fff; }
+    .sidebar .side-section a .badge-mini.new { background: #f0c929; color: #1a1a2e; }
+    .sidebar .side-section a .badge-mini.soon { background: #475569; color: #cbd5e1; }
 
-.highlight {
-  background: var(--accent-yellow);
-  padding: 0 8px;
-  border-radius: 5px;
-  font-weight: bold;
-  display: inline-block;
-  transform: rotate(-1deg);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-}
+    .sidebar .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        color: #f0c929;
+        font-size: 1.5em;
+        cursor: pointer;
+    }
 
-/* Речевой пузырь (Преподаватель) */
-.speech-bubble {
-  background: #e8f8f5;
-  border: 3px solid var(--accent-green);
-  border-radius: 20px;
-  padding: 25px 30px;
-  margin: 30px 0;
-  position: relative;
-  font-style: italic;
-  font-size: 1.3rem;
-}
-.speech-bubble::after {
-  content: '🗣️ Преподаватель';
-  position: absolute;
-  bottom: -15px;
-  left: 30px;
-  background: var(--accent-green);
-  color: white;
-  padding: 2px 15px;
-  border-radius: 20px;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: bold;
-  border: 2px solid var(--ink-black);
-}
+    .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 150;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
 
-/* Блок Вопрос-Ответ */
-.qa-box {
-  background: #fff3e0;
-  border-left: 8px solid var(--accent-orange);
-  padding: 20px 30px;
-  margin: 25px 0;
-  border-radius: 0 15px 15px 0;
-  position: relative;
-}
-.qa-question { font-weight: bold; color: #d35400; font-size: 1.3rem; display: block; margin-bottom: 5px; }
-.qa-answer { color: #2c3e50; font-size: 1.2rem; padding-left: 20px; border-left: 2px dashed #d35400; }
+    .overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
 
-/* Код */
-pre {
-  background: #2c3e50;
-  color: #ecf0f1;
-  padding: 25px;
-  border-radius: 15px;
-  font-family: var(--font-code);
-  font-size: 1.1rem;
-  overflow-x: auto;
-  border: 4px solid #34495e;
-  box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
-  transform: rotate(-0.5deg);
-  margin: 25px 0;
-  position: relative;
-}
-code { font-family: inherit; }
-.keyword { color: #e74c3c; font-weight: bold; }
-.string { color: #2ecc71; }
-.func { color: #3498db; }
-.comment { color: #95a5a6; font-style: italic; }
+    /* ===== КОНТЕЙНЕР ===== */
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
 
-/* Таблицы */
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin: 25px 0;
-  border: 4px solid var(--ink-black);
-  border-radius: 15px;
-  overflow: hidden;
-  font-size: 1.2rem;
-}
-th { background: var(--accent-purple); color: white; padding: 15px; text-align: left; font-family: var(--font-hand); font-size: 1.5rem; }
-td { padding: 15px; border-bottom: 2px dashed #bdc3c7; background: white; }
-tr:nth-child(even) td { background: #f9f9f9; }
-tr:last-child td { border-bottom: none; }
+    /* ===== ШАПКА-ГЕРОЙ ===== */
+    .hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        color: #fff;
+        padding: 60px 30px 70px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
 
-/* Дудлы (эмодзи на фоне) */
-.doodle {
-  position: absolute;
-  font-size: 80px;
-  opacity: 0.1;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
-}
-.doodle.tl { top: 20px; left: 20px; transform: rotate(-15deg); }
-.doodle.tr { top: 20px; right: 20px; transform: rotate(15deg); }
-.doodle.bl { bottom: 20px; left: 20px; transform: rotate(10deg); }
-.doodle.br { bottom: 20px; right: 20px; transform: rotate(-10deg); }
+    .hero::before {
+        content: "🐍";
+        position: absolute;
+        font-size: 200px;
+        opacity: 0.07;
+        top: -40px;
+        left: -30px;
+        transform: rotate(-15deg);
+    }
 
-/* Переход к следующему */
-.next-step {
-  margin-top: 30px;
-  font-weight: bold;
-  color: var(--accent-red);
-  font-size: 1.3rem;
-  text-align: right;
-  font-family: var(--font-hand);
-  font-size: 1.8rem;
-}
+    .hero::after {
+        content: "🧪";
+        position: absolute;
+        font-size: 180px;
+        opacity: 0.07;
+        bottom: -50px;
+        right: -20px;
+        transform: rotate(10deg);
+    }
 
-/* Адаптив */
-@media (max-width: 768px) {
-  h1 { font-size: 3rem; }
-  h2 { font-size: 2rem; }
-  .card { padding: 30px 20px; }
-  pre { font-size: 0.9rem; padding: 15px; }
-  .slide-section { min-height: auto; margin-bottom: 40px; }
-}
+    .hero h1 {
+        font-size: 2.6em;
+        margin-bottom: 10px;
+        text-shadow: 3px 3px 0 #e94560;
+        position: relative;
+        z-index: 1;
+    }
 
+    .hero .subtitle {
+        font-size: 1.2em;
+        color: #f0c929;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero .badge {
+        display: inline-block;
+        background: #e94560;
+        color: #fff;
+        padding: 8px 24px;
+        border-radius: 30px;
+        font-size: 0.95em;
+        margin-top: 18px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    }
+
+    /* ===== БЫСТРЫЙ ДОСТУП ===== */
+    .quick-jump {
+        background: #fff;
+        border-radius: 20px;
+        padding: 25px 30px;
+        margin-top: -40px;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border-top: 6px solid #f0c929;
+    }
+
+    .quick-jump h3 {
+        color: #0f3460;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+    }
+
+    .quick-jump .jump-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    .quick-jump .jump-card {
+        background: #f8f9ff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        text-decoration: none;
+        color: #1a1a2e;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quick-jump .jump-card:hover {
+        border-color: #e94560;
+        background: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(233, 69, 96, 0.15);
+    }
+
+    .quick-jump .jump-card .emoji { font-size: 1.4em; }
+
+    .quick-jump .jump-card .text {
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .quick-jump .jump-card .text small {
+        display: block;
+        color: #888;
+        font-weight: normal;
+        font-size: 0.85em;
+    }
+
+    /* ===== СЕКЦИИ ===== */
+    section {
+        scroll-margin-top: 90px;
+        padding-top: 30px;
+    }
+
+    .section-title {
+        font-size: 1.8em;
+        color: #0f3460;
+        margin: 40px 0 20px;
+        padding-bottom: 10px;
+        border-bottom: 4px solid #e94560;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-title .count {
+        font-size: 0.55em;
+        background: #f0c929;
+        color: #1a1a2e;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+    /* ===== ВВОДНЫЙ БЛОК ===== */
+    .intro {
+        background: #fff;
+        border-radius: 20px;
+        padding: 35px 40px;
+        margin-top: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        border-left: 8px solid #f0c929;
+    }
+
+    .intro p { font-size: 1.05em; margin-bottom: 12px; }
+
+    .intro .highlight {
+        background: #f0c929;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    /* ===== МОЗГ ===== */
+    .brain-box {
+        background: #e8f4f8;
+        border: 3px dashed #0f3460;
+        border-radius: 15px;
+        padding: 22px 25px;
+        margin: 25px 0;
+        position: relative;
+    }
+
+    .brain-box::before {
+        content: "🧠";
+        position: absolute;
+        top: -18px;
+        left: 20px;
+        font-size: 35px;
+        background: #fdf6e3;
+        padding: 0 8px;
+    }
+
+    .brain-box p { font-style: italic; color: #0f3460; }
+
+    /* ===== УПРАВЛЕНИЕ МАТЕРИАЛАМИ ===== */
+    .materials-controls {
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px 25px;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 200px;
+        position: relative;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 11px 16px 11px 42px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 0.95em;
+        color: #1a1a2e;
+        background: #f8f9ff;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #e94560;
+        background: #fff;
+    }
+
+    .search-box::before {
+        content: "🔍";
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1em;
+        pointer-events: none;
+    }
+
+    .filter-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-tabs button {
+        background: #f8f9ff;
+        border: 2px solid #e2e8f0;
+        color: #1a1a2e;
+        padding: 9px 16px;
+        border-radius: 20px;
+        font-family: inherit;
+        font-size: 0.85em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .filter-tabs button:hover {
+        border-color: #e94560;
+        background: #fff;
+    }
+
+    .filter-tabs button.active {
+        background: #e94560;
+        color: #fff;
+        border-color: #e94560;
+        box-shadow: 0 3px 10px rgba(233, 69, 96, 0.3);
+    }
+
+    .filter-tabs button .tab-count {
+        display: inline-block;
+        background: rgba(0,0,0,0.1);
+        color: inherit;
+        font-size: 0.8em;
+        padding: 1px 7px;
+        border-radius: 10px;
+        margin-left: 5px;
+    }
+
+    .filter-tabs button.active .tab-count {
+        background: rgba(255,255,255,0.25);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 50px 20px;
+        color: #888;
+        font-size: 1.05em;
+        background: #fff;
+        border-radius: 18px;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .no-results .emoji {
+        font-size: 3em;
+        display: block;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    /* ===== БЛОК МАТЕРИАЛОВ ===== */
+    .materials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 20px;
+        margin-top: 25px;
+    }
+
+    .material-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 0;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: transform 0.25s, box-shadow 0.25s, opacity 0.3s;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid transparent;
+        position: relative;
+    }
+
+    .material-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 35px rgba(0,0,0,0.15);
+        border-color: #e94560;
+    }
+
+    .material-card.hidden {
+        display: none;
+    }
+
+    .material-card .card-head {
+        background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+        color: #fff;
+        padding: 18px 22px 16px;
+        position: relative;
+    }
+
+    .material-card.theory .card-head { background: linear-gradient(135deg, #0f3460 0%, #16213e 100%); }
+    .material-card.practice .card-head { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+    .material-card.defects .card-head { background: linear-gradient(135deg, #e94560 0%, #c73650 100%); }
+    .material-card.review .card-head { background: linear-gradient(135deg, #f0c929 0%, #d4a800 100%); color: #1a1a2e; }
+    .material-card.review .card-head .num-badge { background: rgba(26,26,46,0.9); color: #f0c929; }
+    .material-card.review .card-head h3 { color: #1a1a2e; }
+
+    .material-card .card-head .num-badge {
+        position: absolute;
+        top: 14px;
+        right: 18px;
+        background: rgba(240, 201, 41, 0.95);
+        color: #1a1a2e;
+        font-size: 0.7em;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+    }
+
+    .material-card .card-head .type-icon {
+        font-size: 1.8em;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .material-card .card-head h3 {
+        font-size: 1.08em;
+        line-height: 1.35;
+        padding-right: 60px;
+    }
+
+    .material-card .card-body {
+        padding: 18px 22px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .material-card .card-body .desc {
+        font-size: 0.9em;
+        color: #555;
+        margin-bottom: 14px;
+        flex: 1;
+    }
+
+    .material-card .topics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+
+    .material-card .topics span {
+        background: #e8f4f8;
+        color: #0f3460;
+        font-size: 0.72em;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .material-card .card-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .material-card .open-btn {
+        flex: 1;
+        background: #e94560;
+        color: #fff;
+        text-decoration: none;
+        padding: 11px 18px;
+        border-radius: 12px;
+        font-size: 0.88em;
+        font-weight: bold;
+        text-align: center;
+        transition: background 0.2s, transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .material-card .open-btn:hover {
+        background: #c73650;
+        transform: scale(1.03);
+    }
+
+    .material-card .meta-badge {
+        position: absolute;
+        top: 14px;
+        left: 18px;
+        font-size: 0.68em;
+        font-weight: bold;
+        padding: 4px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+    }
+
+    .material-card .meta-badge.done { background: #2ecc71; color: #fff; }
+    .material-card .meta-badge.current { background: #f0c929; color: #1a1a2e; }
+    .material-card .meta-badge.soon { background: #64748b; color: #fff; }
+
+    /* ===== ПРОГРЕСС ===== */
+    .progress-wrap {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px 25px;
+        margin-top: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .progress-wrap .label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9em;
+        font-weight: bold;
+        color: #0f3460;
+        margin-bottom: 10px;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 14px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-bar .fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+        border-radius: 10px;
+        transition: width 1s ease;
+        position: relative;
+    }
+
+    .progress-bar .fill::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shine 2.5s infinite;
+    }
+
+    @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* ===== ПЛАН КУРСА (аккордеон) ===== */
+    .module-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .module {
+        background: #fff;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: transform 0.2s;
+    }
+
+    .module:hover { transform: translateX(5px); }
+
+    .module-header {
+        display: flex;
+        align-items: center;
+        padding: 18px 25px;
+        cursor: pointer;
+        gap: 15px;
+        user-select: none;
+    }
+
+    .module-header .num {
+        background: #0f3460;
+        color: #fff;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1em;
+        flex-shrink: 0;
+    }
+
+    .module-header h3 {
+        flex: 1;
+        font-size: 1.1em;
+        color: #1a1a2e;
+    }
+
+    .module-header .hours {
+        background: #f0c929;
+        color: #1a1a2e;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.82em;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .module-header .arrow {
+        color: #e94560;
+        font-size: 0.9em;
+        transition: transform 0.3s;
+    }
+
+    .module.open .module-header .arrow { transform: rotate(90deg); }
+
+    .module-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, padding 0.3s ease;
+        padding: 0 25px;
+        background: #fafafa;
+    }
+
+    .module.open .module-body {
+        max-height: 900px;
+        padding: 20px 25px 25px;
+    }
+
+    .module-body ul {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .module-body ul li {
+        background: #e8f4f8;
+        color: #0f3460;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.88em;
+    }
+
+    .module-body .practice {
+        margin-top: 15px;
+        background: #fff3e0;
+        border-left: 4px solid #f0c929;
+        padding: 12px 18px;
+        border-radius: 0 10px 10px 0;
+        font-size: 0.93em;
+    }
+
+    .module-body .practice strong { color: #e94560; }
+
+    /* ===== ТАБЛИЦА ===== */
+    .hours-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .hours-table th {
+        background: #0f3460;
+        color: #fff;
+        padding: 15px 20px;
+        text-align: left;
+    }
+
+    .hours-table td {
+        background: #fff;
+        padding: 14px 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .hours-table tr:last-child td { border-bottom: none; }
+    .hours-table tr:hover td { background: #f8f9ff; }
+
+    .hours-table .total-row td {
+        background: #f0c929;
+        font-weight: bold;
+        font-size: 1.05em;
+    }
+
+    /* ===== ФОРМАТ ===== */
+    .format-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .format-item {
+        background: #fff;
+        border-radius: 15px;
+        padding: 25px 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-bottom: 4px solid #e94560;
+    }
+
+    .format-item .emoji { font-size: 2.2em; display: block; margin-bottom: 10px; }
+    .format-item h4 { color: #0f3460; margin-bottom: 8px; font-size: 1.02em; }
+    .format-item p { font-size: 0.88em; color: #666; }
+
+    /* ===== Q&A ===== */
+    .qa-block {
+        background: #fff;
+        border-radius: 15px;
+        padding: 22px 28px;
+        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .qa-block .question {
+        font-weight: bold;
+        color: #e94560;
+        font-size: 1.05em;
+        margin-bottom: 8px;
+    }
+
+    .qa-block .answer {
+        color: #333;
+        padding-left: 20px;
+        border-left: 3px solid #f0c929;
+    }
+
+    /* ===== КНОПКА НАВЕРХ ===== */
+    .to-top {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e94560;
+        color: #fff;
+        border: none;
+        font-size: 1.4em;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(233, 69, 96, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s, transform 0.2s;
+        z-index: 90;
+    }
+
+    .to-top.show { opacity: 1; pointer-events: auto; }
+    .to-top:hover { transform: scale(1.1); }
+
+    /* ===== ФУТЕР ===== */
+    footer {
+        text-align: center;
+        padding: 50px 20px 20px;
+        color: #888;
+        font-size: 0.9em;
+    }
+
+    footer .next-link {
+        display: inline-block;
+        background: #e94560;
+        color: #fff;
+        text-decoration: none;
+        padding: 14px 40px;
+        border-radius: 30px;
+        font-size: 1.05em;
+        font-weight: bold;
+        margin-bottom: 20px;
+        transition: background 0.2s, transform 0.2s;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    }
+
+    footer .next-link:hover {
+        background: #c73650;
+        transform: scale(1.05);
+    }
+
+    /* ===== АДАПТИВ ===== */
+    @media (max-width: 700px) {
+        .hero h1 { font-size: 1.8em; }
+        .hero .subtitle { font-size: 1em; }
+        .intro { padding: 25px 20px; }
+        .section-title { font-size: 1.4em; }
+        .topbar .topnav { display: none; }
+        .topbar .continue-btn { display: block; font-size: 0.8em; padding: 7px 14px; }
+        .hours-table th, .hours-table td { padding: 10px 12px; font-size: 0.9em; }
+        .materials-grid { grid-template-columns: 1fr; }
+        .materials-controls { padding: 16px 18px; }
+        .filter-tabs { width: 100%; }
+        .filter-tabs button { flex: 1; padding: 8px 10px; font-size: 0.78em; }
+    }
+
+    @media (min-width: 701px) and (max-width: 1100px) {
+        .topbar .continue-btn { display: block; }
+    }
 </style>
 </head>
 <body>
 
-<!-- Прогресс бар -->
-<div class="progress-bar" id="progressBar"></div>
+<!-- ==================== ЛИПКАЯ ШАПКА ==================== -->
+<div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Меню">☰</button>
+    <a href="#top" class="logo">🧪 Python Testing</a>
+    <nav class="topnav" id="topnav">
+        <a href="#intro" data-target="intro">Введение</a>
+        <a href="#materials" data-target="materials">Материалы</a>
+        <a href="#plan" data-target="plan">План</a>
+        <a href="#hours" data-target="hours">Часы</a>
+        <a href="#format" data-target="format">Формат</a>
+        <a href="#qa" data-target="qa">Вопросы</a>
+    </nav>
+    <button class="continue-btn" id="continueBtn" onclick="continueFromLast()">▶ Продолжить</button>
+</div>
 
-<!-- Кнопка фуллскрина -->
-<button class="fs-toggle" onclick="toggleFS()" title="Полноэкранный режим (F)">🖥️</button>
+<!-- ==================== БОКОВАЯ ПАНЕЛЬ ==================== -->
+<aside class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">✕</button>
+    <h3>📚 Навигация</h3>
 
-<!-- Навигация справа -->
-<nav class="side-nav" id="sideNav">
-  <!-- Генерируется JS -->
-</nav>
-
-<div class="main-container">
-
-  <!-- СЛАЙД 1 -->
-  <section class="slide-section" id="slide-1" data-title="Титульный">
-    <div class="card">
-      <div class="slide-number">#1</div>
-      <span class="doodle tl">🐍</span>
-      <span class="doodle br">✅</span>
-      
-      <h1>Практическая работа №1</h1>
-      <h2 style="border:none; font-size: 2.2rem;">Тестирование простых функций в Python<br><span class="highlight">Ручные проверки → assert</span></h2>
-      
-      <div class="speech-bubble">
-        Сегодня мы начинаем тему, которая отличает «код, который работает» от «кода, которому можно доверять». Это тестирование. Мы начнём с самого простого — ручных проверок, а потом перейдём к <code>assert</code>.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Вопрос: Как вы думаете, что значит «протестировать функцию»?</span>
-        <div class="qa-answer">💡 Проверить, что она возвращает то, что должна, на разных входных данных.</div>
-      </div>
-      
-      <div class="next-step">➡️ Сегодня мы разберём это на пяти простых функциях.</div>
+    <div class="side-section">
+        <h4>Разделы страницы</h4>
+        <a href="#intro" onclick="closeSidebar()">👋 Введение</a>
+        <a href="#materials" onclick="closeSidebar()">📚 Материалы курса</a>
+        <a href="#plan" onclick="closeSidebar()">📘 План курса</a>
+        <a href="#hours" onclick="closeSidebar()">📊 Таблица часов</a>
+        <a href="#format" onclick="closeSidebar()">🎯 Формат</a>
+        <a href="#qa" onclick="closeSidebar()">❓ Вопрос — ответ</a>
     </div>
-  </section>
 
-  <!-- СЛАЙД 2 -->
-  <section class="slide-section" id="slide-2" data-title="Где мы">
-    <div class="card">
-      <div class="slide-number">#2</div>
-      <span class="doodle tl">🗺️</span>
-      
-      <h2>Где мы находимся</h2>
-      <pre><code>Теория: Тестирование и качество ПО
-   ↓
-<span class="highlight">Практика №1: ручные тесты → assert</span>
-   ↓
-Дальше: pytest</code></pre>
-      
-      <div class="speech-bubble">
-        Мы уже прошли теорию: верификация, валидация, QA, QC, дефекты. Но теория без практики — это просто слова. Сегодня — первый шаг в реальное тестирование.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Чем тестирование отличается от «просто запустить программу»?</span>
-        <div class="qa-answer">💡 Запуск показывает, что программа не падает. Тестирование проверяет, что она даёт правильный результат.</div>
-      </div>
-      
-      <div class="next-step">➡️ И начнём мы с самого простого — пяти функций.</div>
+    <div class="side-section">
+        <h4>Пройденные материалы</h4>
+        <a href="topic-quality.html">
+            📖 Тестирование и качество ПО
+            <span class="badge-mini done">✓</span>
+        </a>
+        <a href="topic-defects.html">
+            🐛 Дефекты и жизненный цикл бага
+            <span class="badge-mini done">✓</span>
+        </a>
+        <a href="practice-1.html">
+            🧪 Практика №1: assert
+            <span class="badge-mini done">✓</span>
+        </a>
+        <a href="practice-1-разбор.html">
+            🎬 Разбор Практики №1
+            <span class="badge-mini done">✓</span>
+        </a>
     </div>
-  </section>
 
-  <!-- СЛАЙД 3 -->
-  <section class="slide-section" id="slide-3" data-title="Задачи">
-    <div class="card">
-      <div class="slide-number">#3</div>
-      <span class="doodle br">🎯</span>
-      
-      <h2>Что от нас хотят</h2>
-      <ul>
-        <li>Создать <code>functions.py</code> с 5 функциями.</li>
-        <li>Написать ручные тесты (без <code>assert</code>).</li>
-        <li>Написать тесты с <code>assert</code>.</li>
-        <li>Специально сломать тест и посмотреть на <span class="highlight">AssertionError</span>.</li>
-      </ul>
-      
-      <div class="speech-bubble">
-        Обратите внимание на порядок. Сначала — вручную. Потом — через <code>assert</code>. Это не случайно. Если сразу дать <code>assert</code>, вы не поймёте, что внутри него происходит.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему сначала ручные тесты, а потом assert?</span>
-        <div class="qa-answer">💡 Чтобы понять механику: assert — это сокращение для ручной проверки.</div>
-      </div>
+    <div class="side-section">
+        <h4>Следующие материалы</h4>
+        <a href="#materials">
+            🔬 Практика №2: тест-дизайн
+            <span class="badge-mini new">new</span>
+        </a>
+        <a href="#materials">
+            🧩 pytest: первые шаги
+            <span class="badge-mini soon">soon</span>
+        </a>
     </div>
-  </section>
 
-  <!-- СЛАЙД 4 -->
-  <section class="slide-section" id="slide-4" data-title="Главная мысль">
-    <div class="card">
-      <div class="slide-number">#4</div>
-      <span class="doodle tl">🧠</span>
-      
-      <h2>Главная мысль практики</h2>
-      <div style="text-align:center; margin: 40px 0;">
-        <h1 style="font-size: 2.5rem; color:var(--ink-black); text-shadow:none; border: 5px solid var(--accent-red); padding: 30px; border-radius: 20px; background:#fff9c4; transform: rotate(1deg);">
-          Тестирование — это <span class="highlight">сравнение ожидаемого результата с фактическим</span>.
-        </h1>
-      </div>
-      
-      <div class="speech-bubble">
-        Запомните эту фразу. Всё тестирование сводится к одному: у нас есть ожидание, у нас есть факт, мы их сравниваем. Если совпало — тест пройден. Если нет — тест упал.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что такое «ожидаемый» и «фактический» результат?</span>
-        <div class="qa-answer">💡 Ожидаемый — то, что функция должна вернуть. Фактический — то, что она вернула на самом деле.</div>
-      </div>
+    <div class="side-section">
+        <h4>Модули</h4>
+        <a href="#plan" onclick="closeSidebar(); openModule(0)">1. Основы тестирования</a>
+        <a href="#plan" onclick="closeSidebar(); openModule(1)">2. Отладка и логирование</a>
+        <a href="#plan" onclick="closeSidebar(); openModule(2)">3. Автоматизация (pytest)</a>
+        <a href="#plan" onclick="closeSidebar(); openModule(3)">4. Документация</a>
+        <a href="#plan" onclick="closeSidebar(); openModule(4)">5. Итоговый проект</a>
     </div>
-  </section>
+</aside>
 
-  <!-- СЛАЙД 5 -->
-  <section class="slide-section" id="slide-5" data-title="Функции">
-    <div class="card">
-      <div class="slide-number">#5</div>
-      <span class="doodle br">⚙️</span>
-      
-      <h2>Функции для тестирования</h2>
-      <pre><code><span class="keyword">def</span> <span class="func">add</span>(a, b):
-    <span class="keyword">return</span> a + b
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-<span class="keyword">def</span> <span class="func">multiply</span>(a, b):
-    <span class="keyword">return</span> a * b
+<!-- ==================== ШАПКА-ГЕРОЙ ==================== -->
+<div id="top"></div>
+<header class="hero">
+    <h1>🧪 Тестирование и автоматизация на Python</h1>
+    <p class="subtitle">Учебный курс · 110 часов · Head First style</p>
+    <span class="badge">🐍 Python уже изучен · стартуем с тестирования</span>
+</header>
 
-<span class="keyword">def</span> <span class="func">is_even</span>(n):
-    <span class="keyword">return</span> n % 2 == 0
+<div class="container">
 
-<span class="keyword">def</span> <span class="func">reverse_string</span>(s):
-    <span class="keyword">return</span> s[::-1]
-
-<span class="keyword">def</span> <span class="func">max_of_two</span>(a, b):
-    <span class="keyword">if</span> a > b:
-        <span class="keyword">return</span> a
-    <span class="keyword">return</span> b</code></pre>
-      
-      <div class="speech-bubble">
-        Пять функций. Простые, но разные. <code>add</code> и <code>multiply</code> работают с числами. <code>is_even</code> возвращает логическое значение. <code>reverse_string</code> — строку. <code>max_of_two</code> — условная логика.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему мы тестируем именно такие функции?</span>
-        <div class="qa-answer">💡 Они простые, но покрывают разные типы данных и разные типы результатов.</div>
-      </div>
+    <!-- ==================== БЫСТРЫЙ ДОСТУП ==================== -->
+    <div class="quick-jump">
+        <h3>⚡ Быстрый переход — куда хотите?</h3>
+        <div class="jump-grid">
+            <a href="#intro" class="jump-card">
+                <span class="emoji">👋</span>
+                <span class="text">Введение <small>о чём курс</small></span>
+            </a>
+            <a href="#materials" class="jump-card">
+                <span class="emoji">📚</span>
+                <span class="text">Материалы <small>4 пройдено</small></span>
+            </a>
+            <a href="#plan" class="jump-card">
+                <span class="emoji">📘</span>
+                <span class="text">План <small>5 модулей</small></span>
+            </a>
+            <a href="#hours" class="jump-card">
+                <span class="emoji">📊</span>
+                <span class="text">Часы <small>110 всего</small></span>
+            </a>
+            <a href="#format" class="jump-card">
+                <span class="emoji">🎯</span>
+                <span class="text">Формат <small>как учимся</small></span>
+            </a>
+            <a href="#qa" class="jump-card">
+                <span class="emoji">❓</span>
+                <span class="text">Вопросы <small>FAQ</small></span>
+            </a>
+        </div>
     </div>
-  </section>
 
-  <!-- СЛАЙД 6 -->
-  <section class="slide-section" id="slide-6" data-title="Разнообразие">
-    <div class="card">
-      <div class="slide-number">#6</div>
-      
-      <h2>Почему именно эти пять функций</h2>
-      <table>
-        <tr><th>Функция</th><th>Тип входа</th><th>Тип выхода</th><th>Что проверяем</th></tr>
-        <tr><td><code>add</code></td><td>числа</td><td>число</td><td>арифметика</td></tr>
-        <tr><td><code>multiply</code></td><td>числа</td><td>число</td><td>умножение, ноль</td></tr>
-        <tr><td><code>is_even</code></td><td>число</td><td>bool</td><td>логика</td></tr>
-        <tr><td><code>reverse_string</code></td><td>строка</td><td>строка</td><td>работа со строками</td></tr>
-        <tr><td><code>max_of_two</code></td><td>числа</td><td>число</td><td>условие</td></tr>
-      </table>
-      
-      <div class="speech-bubble">
-        Мы специально берём разные типы. Если бы все функции были про числа, мы бы не научились тестировать строки или логические значения.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что особенного в is_even?</span>
-        <div class="qa-answer">💡 Она возвращает True или False, а не число.</div>
-      </div>
-    </div>
-  </section>
+    <!-- ==================== ВВЕДЕНИЕ ==================== -->
+    <section id="intro">
+        <h2 class="section-title"><span>👋</span> Добро пожаловать в курс!</h2>
 
-  <!-- СЛАЙД 7 -->
-  <section class="slide-section" id="slide-7" data-title="Идея теста">
-    <div class="card">
-      <div class="slide-number">#7</div>
-      <span class="doodle tl">🛠️</span>
-      
-      <h2>Ручной тест: идея</h2>
-      <pre><code>1. Вызвать функцию
-2. Сохранить результат
-3. Сравнить с ожидаемым
-4. Напечатать сообщение</code></pre>
-      
-      <div class="speech-bubble">
-        Это четыре шага любого теста. Сейчас мы делаем их вручную, чтобы вы увидели механику. Потом <code>assert</code> сделает то же самое, но короче.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему сохраняем результат в переменную?</span>
-        <div class="qa-answer">💡 Чтобы можно было посмотреть, что именно вернула функция, если тест упадёт.</div>
-      </div>
-    </div>
-  </section>
+        <div class="intro">
+            <p>
+                Этот курс — про то, как <span class="highlight">доверять своему коду</span>.
+                Не просто «запустилось — значит работает», а «я проверил — значит могу быть уверен».
+            </p>
+            <p>
+                Мы начнём с ручных проверок и баг-репортов, затем перейдём к <strong>assert</strong>,
+                <strong>pytest</strong>, логированию, отладке, покрытию кода и документации.
+                А в конце — соберём полноценный мини-проект с тестами и защитой.
+            </p>
+            <p>
+                <strong>Для кого:</strong> супер-новички в тестировании, студенты 2 курса,
+                которые уже знают Python, но ещё не тестировали всерьёз.
+            </p>
+        </div>
 
-  <!-- СЛАЙД 8 -->
-  <section class="slide-section" id="slide-8" data-title="Код теста">
-    <div class="card">
-      <div class="slide-number">#8</div>
-      
-      <h2>Ручной тест: код</h2>
-      <pre><code><span class="keyword">from</span> functions <span class="keyword">import</span> add
+        <div class="brain-box">
+            <p><strong>Мозг спрашивает:</strong> «Я знаю Python. Зачем мне тестирование?»</p>
+            <p style="margin-top: 10px;">
+                <strong>Ответ:</strong> Потому что код, который работает у тебя, может сломаться
+                у пользователя. Потому что логические ошибки не видны глазу. Потому что
+                <em>тестирование — это суперсила, которая отличает любителя от инженера.</em>
+            </p>
+        </div>
+    </section>
 
-<span class="keyword">def</span> <span class="func">test_add</span>():
-    result = add(2, 3)
+    <!-- ==================== МАТЕРИАЛЫ КУРСА ==================== -->
+    <section id="materials">
+        <h2 class="section-title">
+            <span>📚</span> Материалы курса
+            <span class="count" id="materialsCount">4 пройдено · 2 впереди</span>
+        </h2>
 
-    <span class="keyword">if</span> result != 5:
-        print(<span class="string">"❌ Ошибка: add(2, 3) должно быть 5"</span>)
-    <span class="keyword">else</span>:
-        print(<span class="string">"✅ Тест пройден"</span>)
+        <!-- Прогресс -->
+        <div class="progress-wrap">
+            <div class="label">
+                <span>Прогресс по материалам</span>
+                <span>4 из 6</span>
+            </div>
+            <div class="progress-bar">
+                <div class="fill" style="width: 67%;"></div>
+            </div>
+        </div>
 
-test_add()</code></pre>
-      
-      <div class="speech-bubble">
-        Разберём по строкам. Импорт — берём функцию из другого файла. Функция <code>test_add</code> — это тест. Внутри — вызов, сравнение, вывод.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что если add(2, 3) вернёт 6?</span>
-        <div class="qa-answer">💡 Напечатается «❌ Ошибка: add(2, 3) должно быть 5».</div>
-      </div>
-    </div>
-  </section>
+        <!-- Поиск + фильтры -->
+        <div class="materials-controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск по названию, теме, ключевому слову…" oninput="filterMaterials()">
+            </div>
+            <div class="filter-tabs" id="filterTabs">
+                <button class="active" data-filter="all" onclick="setFilter('all', this)">
+                    Все <span class="tab-count">6</span>
+                </button>
+                <button data-filter="done" onclick="setFilter('done', this)">
+                    ✅ Пройдено <span class="tab-count">4</span>
+                </button>
+                <button data-filter="soon" onclick="setFilter('soon', this)">
+                    🔜 Впереди <span class="tab-count">2</span>
+                </button>
+                <button data-filter="theory" onclick="setFilter('theory', this)">
+                    📖 Теория <span class="tab-count">2</span>
+                </button>
+                <button data-filter="practice" onclick="setFilter('practice', this)">
+                    🧪 Практика <span class="tab-count">2</span>
+                </button>
+            </div>
+        </div>
 
-  <!-- СЛАЙД 9 -->
-  <section class="slide-section" id="slide-9" data-title="Разбор">
-    <div class="card">
-      <div class="slide-number">#9</div>
-      
-      <h2>Ручной тест: пошаговый разбор</h2>
-      <pre><code><span class="keyword">from</span> functions <span class="keyword">import</span> add          <span class="comment"># 1. Импорт</span>
-<span class="keyword">def</span> <span class="func">test_add</span>():                    <span class="comment"># 2. Создание теста</span>
-    result = add(2, 3)             <span class="comment"># 3. Вызов</span>
-    <span class="keyword">if</span> result != 5:                <span class="comment"># 4. Сравнение</span>
-        print(<span class="string">"❌ Ошибка"</span>)         <span class="comment"># 5. Ошибка</span>
-    <span class="keyword">else</span>:
-        print(<span class="string">"✅ Тест пройден"</span>)   <span class="comment"># 6. Успех</span>
-test_add()                         <span class="comment"># 7. Запуск</span></code></pre>
-      
-      <div class="speech-bubble">
-        Семь шагов. Каждый важен. Импорт — откуда берём функцию. Создание теста — что тестируем. Вызов — получаем факт. Сравнение — с ожиданием. Вывод — сообщаем результат. Запуск — без него тест не выполнится.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему без test_add() внизу тест не запустится?</span>
-        <div class="qa-answer">💡 Потому что Python выполняет код сверху вниз, но функцию нужно вызвать.</div>
-      </div>
-    </div>
-  </section>
+        <!-- Сетка материалов -->
+        <div class="materials-grid" id="materialsGrid">
 
-  <!-- СЛАЙД 10 -->
-  <section class="slide-section" id="slide-10" data-title="Assert">
-    <div class="card">
-      <div class="slide-number">#10</div>
-      <span class="doodle br">🛡️</span>
-      
-      <h2>Что такое <code>assert</code></h2>
-      <div style="text-align:center; margin: 30px 0;">
-        <h1 style="font-size: 2.2rem; color:var(--ink-black); text-shadow:none;">
-          <code>assert</code> — это утверждение:<br>
-          <span class="highlight">«я утверждаю, что это истинно»</span>.<br>
-          Если ложно — программа останавливается с <span style="color:var(--accent-red);">AssertionError</span>.
-        </h1>
-      </div>
-      
-      <div class="speech-bubble">
-        <code>assert</code> — это встроенное слово Python. Оно читается как утверждение. Мы не пишем «если не равно — ошибка». Мы пишем «утверждаю, что равно». Если это не так — Python сам сообщит.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Чем assert отличается от if?</span>
-        <div class="qa-answer">💡 Первое — утверждение, второе — условие. Первое короче и понятнее.</div>
-      </div>
-    </div>
-  </section>
+            <!-- Материал 1 -->
+            <div class="material-card theory" data-status="done" data-type="theory">
+                <div class="card-head">
+                    <span class="meta-badge done">✓ ПРОЙДЕНО</span>
+                    <span class="num-badge">ТЕМА 1</span>
+                    <span class="type-icon">📖</span>
+                    <h3>Тестирование и качество ПО</h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc">
+                        Что такое качество, почему «работает» ≠ «правильно»,
+                        верификация и валидация, QA / QC / Testing, поддержка,
+                        современные подходы.
+                    </p>
+                    <div class="topics">
+                        <span>Верификация</span>
+                        <span>Валидация</span>
+                        <span>QA / QC</span>
+                        <span>Пирамида тестирования</span>
+                        <span>Shift-left</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="topic-quality.html" class="open-btn">📖 Открыть материал →</a>
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 11 -->
-  <section class="slide-section" id="slide-11" data-title="Тест Assert">
-    <div class="card">
-      <div class="slide-number">#11</div>
-      
-      <h2>Тест с <code>assert</code></h2>
-      <pre><code><span class="keyword">from</span> functions <span class="keyword">import</span> add
+            <!-- Материал 2 -->
+            <div class="material-card defects" data-status="done" data-type="theory">
+                <div class="card-head">
+                    <span class="meta-badge done">✓ ПРОЙДЕНО</span>
+                    <span class="num-badge">ТЕМА 2</span>
+                    <span class="type-icon">🐛</span>
+                    <h3>Дефекты, их типы и жизненный цикл бага</h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc">
+                        Ошибка → дефект → отказ. Типы дефектов. Severity и Priority.
+                        Жизненный цикл бага. Воспроизведение. Баг-репорт.
+                        Отладка в VS Code. Логирование.
+                    </p>
+                    <div class="topics">
+                        <span>Типы дефектов</span>
+                        <span>Severity / Priority</span>
+                        <span>Баг-репорт</span>
+                        <span>VS Code debug</span>
+                        <span>Logging</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="topic-defects.html" class="open-btn">🐛 Открыть материал →</a>
+                    </div>
+                </div>
+            </div>
 
-<span class="keyword">def</span> <span class="func">test_add</span>():
-    <span class="keyword">assert</span> add(2, 3) == 5
-    <span class="keyword">assert</span> add(0, 0) == 0
-    <span class="keyword">assert</span> add(-1, 1) == 0
+            <!-- Материал 3 -->
+            <div class="material-card practice" data-status="done" data-type="practice">
+                <div class="card-head">
+                    <span class="meta-badge done">✓ ПРОЙДЕНО</span>
+                    <span class="num-badge">ПРАКТИКА 1</span>
+                    <span class="type-icon">🧪</span>
+                    <h3>Практика №1: ручные проверки → assert</h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc">
+                        Пять функций, ручные тесты, assert, сломанный тест
+                        и AssertionError. Первый шаг к настоящему тестированию.
+                    </p>
+                    <div class="topics">
+                        <span>add</span>
+                        <span>multiply</span>
+                        <span>is_even</span>
+                        <span>reverse_string</span>
+                        <span>max_of_two</span>
+                        <span>assert</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="practice-1.html" class="open-btn">🧪 Открыть материал →</a>
+                    </div>
+                </div>
+            </div>
 
-test_add()
-print(<span class="string">"Все тесты пройдены!"</span>)</code></pre>
-      
-      <div class="speech-bubble">
-        Три строки вместо двенадцати. И каждая строка читается как утверждение: «add(2, 3) равно 5», «add(0, 0) равно 0», «add(-1, 1) равно 0».
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что если первый assert упадёт?</span>
-        <div class="qa-answer">💡 Программа остановится, остальные assert не выполнятся.</div>
-      </div>
-    </div>
-  </section>
+            <!-- Материал 4 — разбор практики -->
+            <div class="material-card review" data-status="done" data-type="practice">
+                <div class="card-head">
+                    <span class="meta-badge done">✓ ПРОЙДЕНО</span>
+                    <span class="num-badge">РАЗБОР</span>
+                    <span class="type-icon">🎬</span>
+                    <h3>Разбор Практики №1 по слайдам</h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc">
+                        Готовый сценарий презентации: 20 слайдов с речью преподавателя,
+                        вопросами ученикам, ответами и переходами.
+                    </p>
+                    <div class="topics">
+                        <span>20 слайдов</span>
+                        <span>Речь</span>
+                        <span>Вопросы</span>
+                        <span>Ответы</span>
+                        <span>PowerPoint</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="practice-1-разбор.html" class="open-btn">🎬 Открыть разбор →</a>
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 12 -->
-  <section class="slide-section" id="slide-12" data-title="Сравнение">
-    <div class="card">
-      <div class="slide-number">#12</div>
-      
-      <h2>Ручной тест vs <code>assert</code></h2>
-      <table>
-        <tr><th>Критерий</th><th>Ручной тест</th><th><code>assert</code></th></tr>
-        <tr><td>Проверка</td><td>вручную через if</td><td>автоматически</td></tr>
-        <tr><td>Ошибка</td><td>вручную через print</td><td>автоматически</td></tr>
-        <tr><td>Код</td><td>много</td><td>одна строка</td></tr>
-        <tr><td>Читаемость</td><td>низкая</td><td>высокая</td></tr>
-        <tr><td>Похожесть на настоящий тест</td><td>нет</td><td>да</td></tr>
-      </table>
-      
-      <div class="speech-bubble">
-        Посмотрите на таблицу. <code>assert</code> выигрывает по всем пунктам. Но ручные тесты нужны, чтобы понять, что происходит внутри. <code>assert</code> — это просто сокращение.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему assert — это шаг к pytest?</span>
-        <div class="qa-answer">💡 Потому что pytest использует assert внутри.</div>
-      </div>
-    </div>
-  </section>
+            <!-- Материал 5 — впереди -->
+            <div class="material-card theory" data-status="soon" data-type="practice" style="opacity: 0.85;">
+                <div class="card-head" style="background: linear-gradient(135deg, #475569 0%, #334155 100%);">
+                    <span class="meta-badge soon">🔜 ВПЕРЕДИ</span>
+                    <span class="num-badge">ПРАКТИКА 2</span>
+                    <span class="type-icon">🔬</span>
+                    <h3>Практика №2: тест-дизайн</h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc">
+                        Таблицы значений, классы эквивалентности, граничные значения.
+                        Учимся придумывать тесты, а не просто писать их.
+                    </p>
+                    <div class="topics">
+                        <span>Таблицы значений</span>
+                        <span>Классы эквивалентности</span>
+                        <span>Граничные значения</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="open-btn" style="background: #64748b; pointer-events: none;">
+                            🔜 Скоро
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 13 -->
-  <section class="slide-section" id="slide-13" data-title="Задание 1">
-    <div class="card">
-      <div class="slide-number">#13</div>
-      <span class="doodle tl">✍️</span>
-      
-      <h2>Задание 1. Ручные тесты</h2>
-      <p>Создать <code>test_manual_more.py</code> с ручными тестами для:</p>
-      <ul>
-        <li><code>multiply</code></li>
-        <li><code>is_even</code></li>
-        <li><code>reverse_string</code></li>
-        <li><code>max_of_two</code></li>
-      </ul>
-      
-      <div class="speech-bubble">
-        Вы уже видели ручной тест для <code>add</code>. Теперь сделайте то же самое для остальных четырёх функций. По три случая на каждую.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Какие случаи проверить для multiply?</span>
-        <div class="qa-answer">💡 Обычное умножение, умножение на ноль, отрицательные числа.</div>
-      </div>
-    </div>
-  </section>
+            <!-- Материал 6 — впереди -->
+            <div class="material-card theory" data-status="soon" data-type="theory" style="opacity: 0.85;">
+                <div class="card-head" style="background: linear-gradient(135deg, #475569 0%, #334155 100%);">
+                    <span class="meta-badge soon">🔜 ВПЕРЕДИ</span>
+                    <span class="num-badge">МОДУЛЬ 3</span>
+                    <span class="type-icon">🧩</span>
+                    <h3>pytest: первые шаги</h3>
+                </div>
+                <div class="card-body">
+                    <p class="desc">
+                        Структура проекта, запуск тестов, assert в pytest,
+                        параметризация, первые фикстуры, отчёты.
+                    </p>
+                    <div class="topics">
+                        <span>pytest</span>
+                        <span>assert</span>
+                        <span>Параметризация</span>
+                        <span>Фикстуры</span>
+                        <span>pytest-cov</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="open-btn" style="background: #64748b; pointer-events: none;">
+                            🔜 Скоро
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 14 -->
-  <section class="slide-section" id="slide-14" data-title="Задание 2">
-    <div class="card">
-      <div class="slide-number">#14</div>
-      
-      <h2>Задание 2. Тесты с <code>assert</code></h2>
-      <p>Создать <code>test_assert_more.py</code>:</p>
-      <pre><code><span class="keyword">def</span> <span class="func">test_multiply</span>():
-    <span class="keyword">assert</span> multiply(2, 3) == 6
-    <span class="keyword">assert</span> multiply(0, 5) == 0
-    <span class="keyword">assert</span> multiply(-2, 3) == -6</code></pre>
-      
-      <div class="speech-bubble">
-        То же самое, но короче. И не нужно вручную писать <code>print</code>. Python сам сообщит, если что-то не так.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему assert is_even(4) == True, а не просто assert is_even(4)?</span>
-        <div class="qa-answer">💡 Чтобы явно проверить, что функция вернула именно True, а не что-то другое.</div>
-      </div>
-    </div>
-  </section>
+        </div>
 
-  <!-- СЛАЙД 15 -->
-  <section class="slide-section" id="slide-15" data-title="Сломать тест">
-    <div class="card">
-      <div class="slide-number">#15</div>
-      <span class="doodle br">💥</span>
-      
-      <h2>Задание 3. Сломать тест</h2>
-      <pre><code><span class="keyword">def</span> <span class="func">test_broken</span>():
-    <span class="keyword">assert</span> add(2, 2) == 5  <span class="comment"># специально неверно</span>
+        <!-- Нет результатов -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <span class="emoji">🔍</span>
+            <p>Ничего не найдено. Попробуйте изменить запрос или фильтр.</p>
+        </div>
+    </section>
 
-test_broken()</code></pre>
-      
-      <div class="speech-bubble">
-        Это специальное задание. Мы ломаем тест, чтобы увидеть <code>AssertionError</code>. Это важно: тест, который упал — это не катастрофа. Это сигнал, что тест работает.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Зачем специально ломать тест?</span>
-        <div class="qa-answer">💡 Чтобы увидеть, как выглядит ошибка, и перестать её бояться.</div>
-      </div>
-    </div>
-  </section>
+    <!-- ==================== ПЛАН ==================== -->
+    <section id="plan">
+        <h2 class="section-title"><span>📘</span> План курса</h2>
 
-  <!-- СЛАЙД 16 -->
-  <section class="slide-section" id="slide-16" data-title="AssertionError">
-    <div class="card">
-      <div class="slide-number">#16</div>
-      
-      <h2>Как выглядит <code>AssertionError</code></h2>
-      <pre style="background:#c0392b; color:white;"><code>Traceback (most recent call last):
-  File "test_broken.py", line 4, in &lt;module&gt;
-    test_broken()
-  File "test_broken.py", line 2, in test_broken
-    assert add(2, 2) == 5
-AssertionError</code></pre>
-      
-      <div class="speech-bubble">
-        Читаем сверху вниз. <code>Traceback</code> — след ошибки. Файл и строка — где. Строка с <code>assert</code> — что именно упало. <code>AssertionError</code> — что не так.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что делать, если тест упал?</span>
-        <div class="qa-answer">💡 Понять, что не так: код или тест. Исправить. Запустить снова.</div>
-      </div>
-    </div>
-  </section>
+        <div class="module-list">
 
-  <!-- СЛАЙД 17 -->
-  <section class="slide-section" id="slide-17" data-title="Мышление">
-    <div class="card">
-      <div class="slide-number">#17</div>
-      <span class="doodle tl">🧩</span>
-      
-      <h2>Как мыслить при тестировании</h2>
-      <pre><code>1. Понять, что должна делать функция
-2. Определить ожидаемый результат
-3. Вызвать функцию
-4. Сравнить
-5. Повторить для разных случаев
-6. Если упало — разобраться</code></pre>
-      
-      <div class="speech-bubble">
-        Это алгоритм тестирования. Он одинаков для любой функции. Сначала понимаем, что должно быть. Потом проверяем, что есть. Потом сравниваем.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что если тест упал, а код правильный?</span>
-        <div class="qa-answer">💡 Значит, тест неправильный. Нужно исправить тест.</div>
-      </div>
-    </div>
-  </section>
+            <div class="module" data-module="0">
+                <div class="module-header" onclick="toggleModuleEl(this)">
+                    <span class="num">1</span>
+                    <h3>Основы тестирования через практику</h3>
+                    <span class="hours">24 ч</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="module-body">
+                    <ul>
+                        <li>Роль тестирования в разработке ПО</li>
+                        <li>Типы ошибок</li>
+                        <li>Жизненный цикл дефекта</li>
+                        <li>Баг-репорт</li>
+                        <li>Таблицы значений</li>
+                        <li>Классы эквивалентности</li>
+                        <li>Граничные значения</li>
+                        <li>Чек-листы и тест-кейсы</li>
+                        <li>Тестирование Python-функций</li>
+                        <li>Тестирование UI без инструментов</li>
+                    </ul>
+                    <div class="practice">
+                        <strong>Практика:</strong> поиск багов в чужом коде, написание баг-репортов,
+                        создание чек-листов, тестирование формы регистрации (макет).
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 18 -->
-  <section class="slide-section" id="slide-18" data-title="Схема">
-    <div class="card">
-      <div class="slide-number">#18</div>
-      
-      <h2>Итоговая схема практики</h2>
-      <pre><code>1. functions.py — 5 функций
-2. Ручной тест для add
-3. Тест с assert для add
-4. Ручные тесты для остальных
-5. Тесты с assert для остальных
-6. Сломать тест → AssertionError</code></pre>
-      
-      <div class="speech-bubble">
-        Вот весь путь практики. От простого к сложному. От ручного к автоматическому.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Что мы поняли про тестирование?</span>
-        <div class="qa-answer">💡 Тест — это сравнение ожидаемого с фактическим.</div>
-      </div>
-    </div>
-  </section>
+            <div class="module" data-module="1">
+                <div class="module-header" onclick="toggleModuleEl(this)">
+                    <span class="num">2</span>
+                    <h3>Отладка, логирование и анализ поведения программ</h3>
+                    <span class="hours">16 ч</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="module-body">
+                    <ul>
+                        <li>Логирование в Python: logging</li>
+                        <li>Уровни логов</li>
+                        <li>Отладка в VS Code: breakpoints, watch, step-into</li>
+                        <li>Анализ ошибок по логам</li>
+                        <li>Репродукция сложных багов</li>
+                        <li>Диагностика поведения программы</li>
+                    </ul>
+                    <div class="practice">
+                        <strong>Практика:</strong> логирование мини-приложения, отладка чужого кода,
+                        поиск причин падения по логам, написание отчёта о дефекте.
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 19 -->
-  <section class="slide-section" id="slide-19" data-title="Итог">
-    <div class="card">
-      <div class="slide-number">#19</div>
-      <span class="doodle br">🏆</span>
-      
-      <h2>Главная мысль</h2>
-      <div style="text-align:center; margin: 40px 0;">
-        <h1 style="font-size: 2.2rem; color:var(--ink-black); text-shadow:none; border: 5px solid var(--accent-green); padding: 30px; border-radius: 20px; background:#e8f8f5;">
-          Тестирование — это <span class="highlight">систематическая проверка</span> того, что функция возвращает <span class="highlight">ожидаемый результат</span> на <span class="highlight">разных входных данных</span>.
-        </h1>
-      </div>
-      
-      <div class="speech-bubble">
-        Запомните это. Тестирование — не «запустить и посмотреть». Это система: разные входы, ожидаемые выходы, сравнение.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Почему «программа запускается» — это ещё не качество?</span>
-        <div class="qa-answer">💡 Потому что она может запускаться, но считать неправильно.</div>
-      </div>
-    </div>
-  </section>
+            <div class="module" data-module="2">
+                <div class="module-header" onclick="toggleModuleEl(this)">
+                    <span class="num">3</span>
+                    <h3>Автоматизация тестирования на Python (pytest)</h3>
+                    <span class="hours">30 ч</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="module-body">
+                    <ul>
+                        <li>pytest: структура тестов, assert</li>
+                        <li>Параметризация тестов</li>
+                        <li>Фикстуры (базовые)</li>
+                        <li>Покрытие кода</li>
+                        <li>Интеграционные тесты</li>
+                        <li>Тестирование зависимостей</li>
+                        <li>Тестирование мини-API</li>
+                        <li>Тестирование sqlite3</li>
+                        <li>Тестирование мини-приложений</li>
+                    </ul>
+                    <div class="practice">
+                        <strong>Практика:</strong> написание 20+ тестов, сломать тесты → починить,
+                        повышение покрытия с 40% до 80%, интеграционные тесты,
+                        тестирование API через requests + pytest.
+                    </div>
+                </div>
+            </div>
 
-  <!-- СЛАЙД 20 -->
-  <section class="slide-section" id="slide-20" data-title="Вопросы">
-    <div class="card">
-      <div class="slide-number">#20</div>
-      <span class="doodle tl">🎓</span>
-      
-      <h2>Контрольные вопросы</h2>
-      <ul style="list-style-type: decimal; font-size: 1.6rem;">
-        <li>Что такое тестирование?</li>
-        <li>Чем ручной тест отличается от <code>assert</code>?</li>
-        <li>Что делает <code>assert</code>?</li>
-        <li>Что такое крайний случай?</li>
-        <li>Что делать, если тест упал?</li>
-      </ul>
-      
-      <div class="speech-bubble">
-        Ответьте на эти вопросы. Если ответы есть — практика достигла цели.
-      </div>
-      
-      <div class="qa-box">
-        <span class="qa-question">❓ Кто хочет ответить на первый вопрос?</span>
-        <div class="qa-answer">💡 Тестирование — это сравнение ожидаемого результата с фактическим.</div>
-      </div>
-      
-      <h1 style="text-align:center; margin-top:30px; font-size:3rem; color:var(--accent-green); text-shadow: 3px 3px 0 var(--accent-yellow);">Спасибо за работу! 🚀</h1>
-    </div>
-  </section>
+            <div class="module" data-module="3">
+                <div class="module-header" onclick="toggleModuleEl(this)">
+                    <span class="num">4</span>
+                    <h3>Документация разработчика и тестировщика</h3>
+                    <span class="hours">20 ч</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="module-body">
+                    <ul>
+                        <li>README: структура, примеры, best practices</li>
+                        <li>CHANGELOG и семантическое версионирование</li>
+                        <li>Docstrings: стандарты</li>
+                        <li>Автоматическая генерация документации</li>
+                        <li>Пользовательская документация: FAQ, troubleshooting</li>
+                        <li>Тестовая документация</li>
+                        <li>pdoc (базово)</li>
+                    </ul>
+                    <div class="practice">
+                        <strong>Практика:</strong> написание README, создание инструкции
+                        по запуску, тестовой документации, генерация через pdoc, составление CHANGELOG.
+                    </div>
+                </div>
+            </div>
+
+            <div class="module" data-module="4">
+                <div class="module-header" onclick="toggleModuleEl(this)">
+                    <span class="num">5</span>
+                    <h3>Итоговый комплексный проект</h3>
+                    <span class="hours">20 ч</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="module-body">
+                    <ul>
+                        <li>Мини-приложение</li>
+                        <li>Модульные и интеграционные тесты</li>
+                        <li>Документация</li>
+                        <li>Баг-репорты</li>
+                        <li>Чек-листы</li>
+                        <li>Покрытие кода</li>
+                        <li>Защита проекта</li>
+                    </ul>
+                    <div class="practice">
+                        <strong>Практика:</strong> самостоятельная работа, консультации,
+                        разбор ошибок, улучшение покрытия, финальная защита.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== ТАБЛИЦА ==================== -->
+    <section id="hours">
+        <h2 class="section-title"><span>📊</span> Итоговая таблица по часам</h2>
+
+        <table class="hours-table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Модуль</th>
+                    <th>Содержание</th>
+                    <th>Часы</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Основы тестирования</td>
+                    <td>Баги, тест-дизайн, чек-листы, тест-кейсы</td>
+                    <td><strong>24</strong></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Отладка и логирование</td>
+                    <td>logging, VS Code debug, анализ ошибок</td>
+                    <td><strong>16</strong></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Автоматизация тестирования</td>
+                    <td>pytest, покрытие, интеграции, API</td>
+                    <td><strong>30</strong></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Документация</td>
+                    <td>README, CHANGELOG, docstrings, тестовая документация</td>
+                    <td><strong>20</strong></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Итоговый проект</td>
+                    <td>мини-приложение + тесты + документация</td>
+                    <td><strong>20</strong></td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="3">ИТОГО</td>
+                    <td><strong>110</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== ФОРМАТ ==================== -->
+    <section id="format">
+        <h2 class="section-title"><span>🎯</span> Как проходит курс</h2>
+
+        <div class="format-grid">
+            <div class="format-item">
+                <span class="emoji">🧩</span>
+                <h4>Проблемные задания</h4>
+                <p>Не «сделай по шаблону», а «найди баг», «сломай тест», «повысь покрытие».</p>
+            </div>
+            <div class="format-item">
+                <span class="emoji">💻</span>
+                <h4>Практика на каждом занятии</h4>
+                <p>Никакой теории без кода. Всё сразу пробуем в VS Code.</p>
+            </div>
+            <div class="format-item">
+                <span class="emoji">🔄</span>
+                <h4>От простого к сложному</h4>
+                <p>Ручные проверки → assert → pytest → интеграции → проект.</p>
+            </div>
+            <div class="format-item">
+                <span class="emoji">🧠</span>
+                <h4>Head First style</h4>
+                <p>Мозг не любит скуку. Будут диалоги, вопросы, ошибки и разборы.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== Q&A ==================== -->
+    <section id="qa">
+        <h2 class="section-title"><span>❓</span> Вопрос — ответ</h2>
+
+        <div class="qa-block">
+            <div class="question">Я знаю Python. Мне точно нужен этот курс?</div>
+            <div class="answer">
+                Да. Знать синтаксис и уметь тестировать — это разные навыки.
+                Этот курс научит думать как инженер по качеству.
+            </div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Мы будем только pytest?</div>
+            <div class="answer">
+                Нет. Будет ручное тестирование, тест-дизайн, баг-репорты, логирование,
+                отладка, документация, покрытие кода. Pytest — важная часть, но не единственная.
+            </div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Что в конце курса?</div>
+            <div class="answer">
+                Мини-проект: приложение + модульные и интеграционные тесты +
+                документация + баг-репорты + защита.
+            </div>
+        </div>
+    </section>
 
 </div>
 
+<!-- ==================== ФУТЕР ==================== -->
+<footer>
+    <a href="topic-quality.html" class="next-link">📖 Начать с первой темы →</a>
+    <p>Тестирование и автоматизация на Python · 110 часов</p>
+</footer>
+
+<!-- ==================== КНОПКА НАВЕРХ ==================== -->
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ==================== JS ==================== -->
 <script>
-  // === 1. GENERATE SIDE NAVIGATION ===
-  const sections = document.querySelectorAll('.slide-section');
-  const sideNav = document.getElementById('sideNav');
-  
-  sections.forEach((section, index) => {
-    const dot = document.createElement('div');
-    dot.classList.add('nav-dot');
-    dot.setAttribute('data-title', section.getAttribute('data-title') || `Слайд ${index + 1}`);
-    dot.addEventListener('click', () => {
-      section.scrollIntoView({ behavior: 'smooth' });
-    });
-    sideNav.appendChild(dot);
-  });
-
-  const navDots = document.querySelectorAll('.nav-dot');
-
-  // === 2. INTERSECTION OBSERVER FOR ANIMATIONS & NAV ===
-  const observerOptions = {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.3 // Trigger when 30% of slide is visible
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        // Add visible class for animation
-        entry.target.classList.add('visible');
-        
-        // Update active nav dot
-        const index = Array.from(sections).indexOf(entry.target);
-        navDots.forEach(d => d.classList.remove('active'));
-        if (navDots[index]) navDots[index].classList.add('active');
-      }
-    });
-  }, observerOptions);
-
-  sections.forEach(section => observer.observe(section));
-
-  // === 3. PROGRESS BAR ===
-  window.addEventListener('scroll', () => {
-    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrolled = (winScroll / height) * 100;
-    document.getElementById('progressBar').style.width = scrolled + '%';
-  });
-
-  // === 4. FULLSCREEN TOGGLE ===
-  function toggleFS() {
-    const el = document.documentElement;
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
     }
-  }
 
-  // Keyboard shortcut for fullscreen
-  document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'f') toggleFS();
-  });
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('open');
+    }
 
-  // Initialize first dot as active
-  if (navDots.length > 0) navDots[0].classList.add('active');
+    /* ===== МОДУЛИ (аккордеон) ===== */
+    function toggleModuleEl(header) {
+        const module = header.parentElement;
+        module.classList.toggle('open');
+    }
+
+    function openModule(index) {
+        const modules = document.querySelectorAll('.module');
+        modules.forEach((m, i) => {
+            if (i === index) m.classList.add('open');
+        });
+    }
+
+    /* ===== КНОПКА НАВЕРХ ===== */
+    const toTop = document.getElementById('toTop');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) toTop.classList.add('show');
+        else toTop.classList.remove('show');
+    });
+
+    /* ===== ПОДСВЕТКА АКТИВНОГО РАЗДЕЛА ===== */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('#topnav a');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.target === id);
+                });
+                localStorage.setItem('lastSection', id);
+            }
+        });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+
+    /* ===== «ПРОДОЛЖИТЬ С...» ===== */
+    function continueFromLast() {
+        const last = localStorage.getItem('lastSection') || 'intro';
+        const el = document.getElementById(last);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else document.getElementById('intro').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('load', () => {
+        const last = localStorage.getItem('lastSection');
+        const btn = document.getElementById('continueBtn');
+        if (last) {
+            const titles = {
+                intro: '👋 Введение',
+                materials: '📚 Материалы',
+                plan: '📘 План',
+                hours: '📊 Часы',
+                format: '🎯 Формат',
+                qa: '❓ Вопросы'
+            };
+            btn.textContent = '▶ ' + (titles[last] || 'Продолжить');
+        }
+    });
+
+    /* ===== ЗАКРЫТИЕ SIDEBAR ПО ESC ===== */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
+    /* ===== ФИЛЬТРЫ И ПОИСК МАТЕРИАЛОВ ===== */
+    let currentFilter = 'all';
+
+    function setFilter(filter, btn) {
+        currentFilter = filter;
+
+        document.querySelectorAll('#filterTabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        filterMaterials();
+    }
+
+    function filterMaterials() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.material-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const status = card.dataset.status;
+            const type = card.dataset.type;
+            const text = card.textContent.toLowerCase();
+
+            let matchesFilter = false;
+            if (currentFilter === 'all') matchesFilter = true;
+            else if (currentFilter === 'done') matchesFilter = status === 'done';
+            else if (currentFilter === 'soon') matchesFilter = status === 'soon';
+            else if (currentFilter === 'theory') matchesFilter = type === 'theory';
+            else if (currentFilter === 'practice') matchesFilter = type === 'practice';
+
+            const matchesSearch = query === '' || text.includes(query);
+
+            if (matchesFilter && matchesSearch) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        const noResults = document.getElementById('noResults');
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
 </script>
 
 </body>

@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Разбор Практики №1 — презентация по слайдам</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+        font-family: "Comic Sans MS", "Segoe UI", Arial, sans-serif;
+        background: #fdf6e3;
+        color: #1a1a2e;
+        line-height: 1.7;
+        padding-bottom: 80px;
+    }
+
+    /* ===== ЛИПКАЯ ШАПКА ===== */
+    .topbar {
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(26, 26, 46, 0.97);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 20px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+
+    .topbar .logo {
+        font-weight: bold; font-size: 1.05em;
+        color: #f0c929; text-decoration: none; white-space: nowrap;
+    }
+
+    .topbar .menu-btn {
+        background: transparent;
+        border: 2px solid #f0c929; color: #f0c929;
+        font-size: 1.2em; width: 40px; height: 40px;
+        border-radius: 10px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s; flex-shrink: 0;
+    }
+    .topbar .menu-btn:hover { background: rgba(240, 201, 41, 0.15); }
+
+    .topbar .topnav {
+        display: flex; gap: 6px; flex: 1;
+        overflow-x: auto; scrollbar-width: none;
+    }
+    .topbar .topnav::-webkit-scrollbar { display: none; }
+    .topbar .topnav a {
+        color: #cbd5e1; text-decoration: none;
+        padding: 6px 14px; border-radius: 20px;
+        font-size: 0.88em; white-space: nowrap;
+        transition: background 0.2s, color 0.2s;
+    }
+    .topbar .topnav a:hover,
+    .topbar .topnav a.active { background: #e94560; color: #fff; }
+
+    .topbar .pdf-btn {
+        background: #f0c929; color: #1a1a2e;
+        border: none; padding: 8px 16px; border-radius: 20px;
+        font-weight: bold; font-size: 0.85em;
+        cursor: pointer; white-space: nowrap;
+        font-family: inherit;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+    .topbar .pdf-btn:hover { transform: scale(1.05); }
+
+    .topbar .home-btn {
+        background: transparent;
+        border: 2px solid #94a3b8;
+        color: #cbd5e1;
+        padding: 7px 14px; border-radius: 20px;
+        text-decoration: none; font-size: 0.85em;
+        white-space: nowrap; transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .topbar .home-btn:hover {
+        border-color: #f0c929; color: #f0c929;
+    }
+
+    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+    .sidebar {
+        position: fixed; top: 0; left: -340px;
+        width: 320px; height: 100vh;
+        background: #1a1a2e; color: #fff;
+        padding: 25px 20px; z-index: 200;
+        overflow-y: auto; transition: left 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+    }
+    .sidebar.open { left: 0; }
+    .sidebar h3 {
+        color: #f0c929; font-size: 1.2em;
+        margin-bottom: 18px; padding-bottom: 10px;
+        border-bottom: 2px solid #e94560;
+    }
+    .sidebar .side-section { margin-bottom: 20px; }
+    .sidebar .side-section h4 {
+        color: #94a3b8; font-size: 0.75em;
+        text-transform: uppercase; letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+    .sidebar .side-section a {
+        display: block; color: #e2e8f0;
+        text-decoration: none; padding: 8px 12px;
+        border-radius: 8px; font-size: 0.88em;
+        margin-bottom: 2px;
+        transition: background 0.2s, padding-left 0.2s;
+    }
+    .sidebar .side-section a:hover { background: #0f3460; padding-left: 18px; }
+    .sidebar .side-section a.active { background: #e94560; color: #fff; font-weight: bold; }
+    .sidebar .close-btn {
+        position: absolute; top: 15px; right: 15px;
+        background: transparent; border: none;
+        color: #f0c929; font-size: 1.5em; cursor: pointer;
+    }
+    .sidebar .back-link {
+        display: block; margin-top: 10px;
+        background: #f0c929; color: #1a1a2e !important;
+        text-align: center; font-weight: bold;
+        padding: 10px !important;
+    }
+    .sidebar .back-link:hover { background: #e94560 !important; color: #fff !important; }
+
+    .overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.5); z-index: 150;
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* ===== КОНТЕЙНЕР ===== */
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+
+    /* ===== ШАПКА-ГЕРОЙ ===== */
+    .hero {
+        background: linear-gradient(135deg, #e94560 0%, #c73650 50%, #a02840 100%);
+        color: #fff; padding: 55px 30px 65px;
+        text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+        content: "🎬"; position: absolute;
+        font-size: 200px; opacity: 0.08;
+        top: -40px; left: -30px; transform: rotate(-15deg);
+    }
+    .hero::after {
+        content: "📊"; position: absolute;
+        font-size: 180px; opacity: 0.08;
+        bottom: -50px; right: -20px; transform: rotate(10deg);
+    }
+    .hero .breadcrumb {
+        font-size: 0.85em; color: rgba(255,255,255,0.85);
+        margin-bottom: 15px; position: relative; z-index: 1;
+    }
+    .hero .breadcrumb a { color: #f0c929; text-decoration: none; }
+    .hero .breadcrumb a:hover { text-decoration: underline; }
+    .hero h1 {
+        font-size: 2.2em; margin-bottom: 10px;
+        text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+        position: relative; z-index: 1;
+    }
+    .hero .subtitle {
+        font-size: 1.1em; color: #fff;
+        position: relative; z-index: 1; opacity: 0.95;
+    }
+    .hero .meta {
+        display: flex; gap: 10px; justify-content: center;
+        flex-wrap: wrap; margin-top: 18px;
+        position: relative; z-index: 1;
+    }
+    .hero .meta span {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.35);
+        padding: 5px 14px; border-radius: 20px;
+        font-size: 0.85em; color: #fff;
+    }
+
+    /* ===== PDF CTA ===== */
+    .pdf-cta {
+        background: #fff; border-radius: 20px;
+        padding: 22px 30px; margin-top: -40px;
+        position: relative; z-index: 2;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border-top: 6px solid #f0c929;
+        display: flex; align-items: center;
+        gap: 20px; flex-wrap: wrap;
+    }
+    .pdf-cta .icon { font-size: 2.4em; flex-shrink: 0; }
+    .pdf-cta .text { flex: 1; min-width: 200px; }
+    .pdf-cta .text h3 {
+        color: #0f3460; margin-bottom: 4px; font-size: 1.15em;
+    }
+    .pdf-cta .text p { color: #666; font-size: 0.9em; }
+    .pdf-cta button {
+        background: #e94560; color: #fff;
+        border: none; padding: 14px 28px;
+        border-radius: 30px; font-weight: bold;
+        font-size: 1em; cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s, transform 0.2s;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        white-space: nowrap;
+    }
+    .pdf-cta button:hover { background: #c73650; transform: scale(1.05); }
+
+    /* ===== ИНФО О ПРЕЗЕНТАЦИИ ===== */
+    .info-box {
+        background: #fff; border-radius: 20px;
+        padding: 28px 35px; margin-top: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-left: 8px solid #e94560;
+    }
+    .info-box h3 {
+        color: #0f3460; margin-bottom: 12px; font-size: 1.15em;
+    }
+    .info-box p { font-size: 1em; margin-bottom: 10px; }
+    .info-box ul { margin: 10px 0 10px 25px; }
+    .info-box li { margin-bottom: 6px; font-size: 0.95em; }
+
+    /* ===== ЛЕГЕНДА ===== */
+    .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px; margin-top: 18px;
+    }
+    .legend-item {
+        background: #f8f9ff; border-radius: 10px;
+        padding: 12px 16px; border-left: 4px solid;
+        font-size: 0.88em;
+    }
+    .legend-item.slide { border-color: #0f3460; }
+    .legend-item.speech { border-color: #f0c929; }
+    .legend-item.question { border-color: #e94560; }
+    .legend-item.answer { border-color: #2ecc71; }
+    .legend-item.transition { border-color: #94a3b8; }
+    .legend-item strong { display: block; margin-bottom: 4px; color: #0f3460; }
+
+    /* ===== СЕКЦИИ ===== */
+    section { scroll-margin-top: 90px; padding-top: 30px; }
+
+    .section-title {
+        font-size: 1.7em; color: #0f3460;
+        margin: 40px 0 20px;
+        padding-bottom: 10px;
+        border-bottom: 4px solid #e94560;
+        display: flex; align-items: center; gap: 12px;
+    }
+    .section-title .count {
+        font-size: 0.55em;
+        background: #f0c929; color: #1a1a2e;
+        padding: 4px 14px; border-radius: 20px;
+        font-weight: bold;
+    }
+
+    /* ===== БЫСТРАЯ НАВИГАЦИЯ ПО СЛАЙДАМ ===== */
+    .slides-nav {
+        background: #fff; border-radius: 20px;
+        padding: 22px 28px; margin-top: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .slides-nav h3 {
+        color: #0f3460; margin-bottom: 14px; font-size: 1.05em;
+    }
+    .slides-nav .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+    }
+    .slides-nav a {
+        background: #f8f9ff; border: 2px solid #e2e8f0;
+        border-radius: 10px; padding: 9px 12px;
+        text-decoration: none; color: #1a1a2e;
+        transition: all 0.2s;
+        font-size: 0.82em; font-weight: 600;
+        text-align: center;
+    }
+    .slides-nav a:hover {
+        border-color: #e94560; background: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(233, 69, 96, 0.15);
+    }
+
+    /* ===== СЛАЙД ===== */
+    .slide {
+        background: #fff;
+        border-radius: 20px;
+        margin: 28px 0;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+        overflow: hidden;
+        border: 2px solid transparent;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+    .slide:hover {
+        border-color: #f0c929;
+        transform: translateY(-2px);
+    }
+
+    .slide-header {
+        background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+        color: #fff;
+        padding: 18px 28px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .slide-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(233,69,96,0.2) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .slide-header .slide-num {
+        background: #e94560;
+        color: #fff;
+        min-width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.15em;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 3px 10px rgba(233,69,96,0.4);
+    }
+    .slide-header h3 {
+        font-size: 1.15em;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+
+    .slide-body {
+        padding: 24px 28px;
+    }
+
+    /* ===== БЛОК НА СЛАЙДЕ ===== */
+    .block {
+        margin-bottom: 18px;
+        padding: 14px 20px;
+        border-radius: 12px;
+        position: relative;
+    }
+    .block:last-child { margin-bottom: 0; }
+
+    .block .block-label {
+        display: inline-block;
+        font-size: 0.72em;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+    }
+
+    /* Тип «Что на слайде» */
+    .block.slide-content {
+        background: #f8f9ff;
+        border-left: 5px solid #0f3460;
+    }
+    .block.slide-content .block-label {
+        background: #0f3460; color: #fff;
+    }
+
+    /* Тип «Речь преподавателя» */
+    .block.speech {
+        background: #fff8e1;
+        border-left: 5px solid #f0c929;
+    }
+    .block.speech .block-label {
+        background: #f0c929; color: #1a1a2e;
+    }
+    .block.speech p {
+        font-style: italic;
+        color: #5a4a1a;
+    }
+
+    /* Тип «Вопрос ученикам» */
+    .block.question {
+        background: #fdeef1;
+        border-left: 5px solid #e94560;
+    }
+    .block.question .block-label {
+        background: #e94560; color: #fff;
+    }
+    .block.question p {
+        font-weight: bold;
+        color: #a02840;
+    }
+
+    /* Тип «Ответ» */
+    .block.answer {
+        background: #e8f8f0;
+        border-left: 5px solid #2ecc71;
+    }
+    .block.answer .block-label {
+        background: #2ecc71; color: #fff;
+    }
+    .block.answer p { color: #1e6b3e; }
+
+    /* Тип «Переход» */
+    .block.transition {
+        background: #f1f5f9;
+        border-left: 5px solid #94a3b8;
+    }
+    .block.transition .block-label {
+        background: #94a3b8; color: #fff;
+    }
+    .block.transition p { color: #475569; }
+
+    .block p { font-size: 0.97em; margin-bottom: 8px; }
+    .block p:last-child { margin-bottom: 0; }
+
+    .block ul, .block ol {
+        margin: 8px 0 8px 22px;
+        font-size: 0.95em;
+    }
+    .block li { margin-bottom: 5px; }
+
+    /* ===== КОД ===== */
+    pre {
+        background: #1a1a2e; color: #e2e8f0;
+        padding: 16px 20px; border-radius: 12px;
+        overflow-x: auto; margin: 12px 0;
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 0.86em; line-height: 1.55;
+    }
+    code {
+        font-family: "Consolas", "Monaco", monospace;
+        background: #e8f4f8; color: #c73650;
+        padding: 2px 7px; border-radius: 5px;
+        font-size: 0.9em;
+    }
+    pre code {
+        background: transparent; color: inherit; padding: 0;
+    }
+
+    /* ===== ТАБЛИЦЫ ===== */
+    .styled-table {
+        width: 100%; border-collapse: separate; border-spacing: 0;
+        margin: 12px 0; border-radius: 12px;
+        overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        font-size: 0.9em;
+    }
+    .styled-table th {
+        background: #0f3460; color: #fff;
+        padding: 10px 14px; text-align: left;
+        font-size: 0.92em;
+    }
+    .styled-table td {
+        background: #fff; padding: 9px 14px;
+        border-bottom: 1px solid #eee;
+    }
+    .styled-table tr:last-child td { border-bottom: none; }
+    .styled-table tr:hover td { background: #f8f9ff; }
+
+    /* ===== ИТОГОВАЯ СХЕМА ===== */
+    .final-scheme {
+        background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+        color: #fff; border-radius: 20px;
+        padding: 30px 35px; margin: 30px 0;
+        box-shadow: 0 8px 30px rgba(15, 52, 96, 0.3);
+    }
+    .final-scheme h3 {
+        color: #f0c929; margin-bottom: 18px;
+        font-size: 1.2em;
+    }
+    .final-scheme ol {
+        margin-left: 25px;
+    }
+    .final-scheme li {
+        padding: 6px 0; font-size: 1em;
+        color: #e2e8f0;
+    }
+
+    /* ===== КОНТРОЛЬНЫЕ ВОПРОСЫ ===== */
+    .final-questions {
+        background: linear-gradient(135deg, #f0c929 0%, #e6b800 100%);
+        color: #1a1a2e; border-radius: 20px;
+        padding: 30px 35px; margin: 30px 0;
+        box-shadow: 0 8px 30px rgba(240, 201, 41, 0.4);
+    }
+    .final-questions h3 {
+        margin-bottom: 18px; font-size: 1.2em;
+    }
+    .final-questions ol { margin-left: 25px; }
+    .final-questions li {
+        padding: 6px 0; font-size: 1em;
+        font-weight: 600;
+    }
+
+    /* ===== КНОПКА НАВЕРХ ===== */
+    .to-top {
+        position: fixed; bottom: 25px; right: 25px;
+        width: 50px; height: 50px; border-radius: 50%;
+        background: #e94560; color: #fff; border: none;
+        font-size: 1.4em; cursor: pointer;
+        box-shadow: 0 4px 20px rgba(233, 69, 96, 0.5);
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.3s, transform 0.2s; z-index: 90;
+    }
+    .to-top.show { opacity: 1; pointer-events: auto; }
+    .to-top:hover { transform: scale(1.1); }
+
+    /* ===== ФУТЕР ===== */
+    footer {
+        text-align: center;
+        padding: 50px 20px 20px;
+        color: #888; font-size: 0.9em;
+    }
+    footer .next-link,
+    footer .prev-link {
+        display: inline-block;
+        text-decoration: none; padding: 14px 34px;
+        border-radius: 30px; font-size: 1em;
+        font-weight: bold; margin-bottom: 12px;
+        transition: background 0.2s, transform 0.2s;
+        margin-right: 8px;
+    }
+    footer .next-link {
+        background: #e94560; color: #fff;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    }
+    footer .next-link:hover { background: #c73650; transform: scale(1.05); }
+    footer .prev-link { background: #0f3460; color: #fff; }
+    footer .prev-link:hover { background: #1a4a80; transform: scale(1.05); }
+
+    /* ===== АДАПТИВ ===== */
+    @media (max-width: 700px) {
+        .hero h1 { font-size: 1.5em; }
+        .hero .subtitle { font-size: 0.95em; }
+        .info-box { padding: 22px 20px; }
+        .section-title { font-size: 1.35em; }
+        .topbar .topnav { display: none; }
+        .topbar .home-btn { display: none; }
+        .pdf-cta { padding: 18px 20px; }
+        .pdf-cta button { width: 100%; }
+        .slide-body { padding: 18px 20px; }
+        .slide-header { padding: 14px 20px; }
+        .slide-header h3 { font-size: 1em; }
+        .styled-table th, .styled-table td { padding: 8px 10px; font-size: 0.85em; }
+        .block { padding: 12px 16px; }
+    }
+
+    /* ===== ПЕЧАТЬ / PDF ===== */
+    @media print {
+        .topbar, .sidebar, .overlay, .to-top,
+        .pdf-cta button, footer, .slides-nav,
+        .hero::before, .hero::after { display: none !important; }
+
+        body {
+            background: #fff !important;
+            color: #000 !important;
+            font-family: "Segoe UI", Arial, sans-serif;
+            padding: 0 !important;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 100%; padding: 0 15px; }
+
+        .hero {
+            background: #fff !important;
+            color: #000 !important;
+            padding: 15px 0 10px !important;
+            border-bottom: 3px solid #000;
+            text-align: left !important;
+        }
+        .hero .breadcrumb { color: #666 !important; font-size: 9pt; margin-bottom: 6px; }
+        .hero .breadcrumb a { color: #666 !important; }
+        .hero h1 {
+            font-size: 18pt !important;
+            color: #000 !important;
+            text-shadow: none !important;
+        }
+        .hero .subtitle { color: #333 !important; font-size: 10pt !important; }
+        .hero .meta { justify-content: flex-start !important; margin-top: 8px; }
+        .hero .meta span {
+            background: #f0f0f0 !important;
+            border-color: #ccc !important;
+            color: #333 !important;
+            font-size: 8pt;
+        }
+
+        .pdf-cta {
+            background: #f9f9f9 !important;
+            box-shadow: none !important;
+            border: 1px solid #ccc;
+            border-top: 3px solid #000 !important;
+            margin-top: 15px !important;
+            padding: 10px 15px !important;
+            border-radius: 6px !important;
+        }
+        .pdf-cta .text h3 { font-size: 10pt; }
+        .pdf-cta .text p { font-size: 9pt; color: #666; }
+        .pdf-cta .icon { font-size: 1.4em; }
+
+        .info-box {
+            box-shadow: none !important;
+            border-left: 3px solid #000 !important;
+            padding: 12px 16px !important;
+            background: #f9f9f9 !important;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 13pt !important;
+            color: #000 !important;
+            border-bottom: 2px solid #000 !important;
+            margin: 15px 0 8px !important;
+            padding-bottom: 4px !important;
+            page-break-after: avoid;
+        }
+
+        .slide {
+            box-shadow: none !important;
+            border: 1px solid #999 !important;
+            page-break-inside: avoid;
+            margin: 12px 0 !important;
+            border-radius: 4px !important;
+        }
+
+        .slide-header {
+            background: #333 !important;
+            color: #fff !important;
+            padding: 10px 14px !important;
+        }
+        .slide-header::before { display: none !important; }
+        .slide-header .slide-num {
+            background: #000 !important;
+            box-shadow: none !important;
+            min-width: 32px;
+            height: 32px;
+            font-size: 10pt;
+        }
+        .slide-header h3 { font-size: 11pt !important; }
+
+        .slide-body { padding: 12px 16px !important; }
+
+        .block {
+            padding: 8px 12px !important;
+            margin-bottom: 10px !important;
+            background: #f9f9f9 !important;
+            border-left: 3px solid #666 !important;
+            page-break-inside: avoid;
+        }
+        .block .block-label {
+            font-size: 8pt;
+            background: #333 !important;
+            color: #fff !important;
+        }
+        .block p, .block li { font-size: 9pt !important; }
+
+        pre {
+            background: #f5f5f5 !important;
+            color: #000 !important;
+            border: 1px solid #ccc;
+            padding: 8px 12px !important;
+            font-size: 8pt;
+            page-break-inside: avoid;
+            border-radius: 4px !important;
+        }
+        code {
+            background: #f0f0f0 !important;
+            color: #000 !important;
+            border: 1px solid #ddd;
+        }
+
+        .styled-table {
+            box-shadow: none !important;
+            border: 1px solid #999;
+            page-break-inside: avoid;
+            font-size: 8pt;
+        }
+        .styled-table th {
+            background: #333 !important;
+            color: #fff !important;
+            padding: 6px 8px !important;
+        }
+        .styled-table td { padding: 5px 8px !important; }
+
+        .final-scheme {
+            background: #f0f0f0 !important;
+            color: #000 !important;
+            border: 2px solid #000 !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+        }
+        .final-scheme h3 { color: #000 !important; }
+        .final-scheme li { color: #000 !important; }
+
+        .final-questions {
+            background: #f0f0f0 !important;
+            color: #000 !important;
+            border: 2px solid #000 !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+        }
+
+        a { color: #000 !important; text-decoration: none; }
+        a[href]::after { content: ""; }
+
+        h2, h3, h4 { page-break-after: avoid; }
+    }
+</style>
+</head>
+<body>
+
+<!-- ==================== ЛИПКАЯ ШАПКА ==================== -->
+<div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Меню">☰</button>
+    <a href="index.html" class="logo">🧪 Python Testing</a>
+    <nav class="topnav" id="topnav">
+        <a href="#about" data-target="about">О разборе</a>
+        <a href="#slides" data-target="slides">20 слайдов</a>
+        <a href="#scheme" data-target="scheme">Итоговая схема</a>
+        <a href="#questions" data-target="questions">Вопросы</a>
+    </nav>
+    <button class="pdf-btn" onclick="downloadPDF()">📥 Скачать PDF</button>
+    <a href="index.html" class="home-btn">🏠 Курс</a>
+</div>
+
+<!-- ==================== БОКОВАЯ ПАНЕЛЬ ==================== -->
+<aside class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">✕</button>
+    <h3>📚 Навигация</h3>
+
+    <div class="side-section">
+        <h4>Структура</h4>
+        <a href="#about">ℹ️ О разборе</a>
+        <a href="#slides">🎬 20 слайдов</a>
+        <a href="#scheme">🗺 Итоговая схема</a>
+        <a href="#questions">❓ Контрольные вопросы</a>
+    </div>
+
+    <div class="side-section">
+        <h4>Слайды 1–10</h4>
+        <a href="#slide-1">1. Титульный</a>
+        <a href="#slide-2">2. Где мы находимся</a>
+        <a href="#slide-3">3. Что от нас хотят</a>
+        <a href="#slide-4">4. Главная мысль</a>
+        <a href="#slide-5">5. Функции</a>
+        <a href="#slide-6">6. Почему эти функции</a>
+        <a href="#slide-7">7. Ручной тест: идея</a>
+        <a href="#slide-8">8. Ручной тест: код</a>
+        <a href="#slide-9">9. Пошаговый разбор</a>
+        <a href="#slide-10">10. Что такое assert</a>
+    </div>
+
+    <div class="side-section">
+        <h4>Слайды 11–20</h4>
+        <a href="#slide-11">11. Тест с assert</a>
+        <a href="#slide-12">12. Ручной vs assert</a>
+        <a href="#slide-13">13. Задание 1</a>
+        <a href="#slide-14">14. Задание 2</a>
+        <a href="#slide-15">15. Задание 3</a>
+        <a href="#slide-16">16. AssertionError</a>
+        <a href="#slide-17">17. Как мыслить</a>
+        <a href="#slide-18">18. Итоговая схема</a>
+        <a href="#slide-19">19. Главная мысль</a>
+        <a href="#slide-20">20. Контрольные вопросы</a>
+    </div>
+
+    <div class="side-section">
+        <h4>Скачать</h4>
+        <a href="#" onclick="downloadPDF(); return false;" style="background:#f0c929; color:#1a1a2e; font-weight:bold; text-align:center;">📥 Скачать PDF</a>
+    </div>
+
+    <div class="side-section">
+        <h4>Курс</h4>
+        <a href="index.html" class="back-link">🏠 Вернуться к плану</a>
+    </div>
+</aside>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- ==================== ГЕРОЙ ==================== -->
+<div id="top"></div>
+<header class="hero">
+    <div class="breadcrumb">
+        <a href="index.html">Главная</a> → Модуль 1 → Практика №1 → Разбор
+    </div>
+    <h1>🎬 Разбор Практики №1 по слайдам</h1>
+    <p class="subtitle">Готовый сценарий презентации: 20 слайдов с речью, вопросами и ответами</p>
+    <div class="meta">
+        <span>⏱ 20 слайдов</span>
+        <span>🎤 Готово для PowerPoint</span>
+        <span>🎯 Модуль 1</span>
+        <span>📥 PDF доступен</span>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- ==================== PDF CTA ==================== -->
+    <div class="pdf-cta">
+        <span class="icon">📄</span>
+        <div class="text">
+            <h3>Сохранить разбор в PDF</h3>
+            <p>Нажмите кнопку — откроется окно печати. Выберите «Сохранить как PDF».</p>
+        </div>
+        <button onclick="downloadPDF()">📥 Скачать PDF</button>
+    </div>
+
+    <!-- ==================== О РАЗБОРЕ ==================== -->
+    <section id="about">
+        <h2 class="section-title"><span>ℹ️</span> О разборе</h2>
+
+        <div class="info-box">
+            <p>Ниже — <strong>готовый сценарий презентации</strong>. Каждый слайд — отдельный смысловой блок. Для каждого слайда дано:</p>
+            <ul>
+                <li><strong>Заголовок слайда</strong> — что показать на экране;</li>
+                <li><strong>Что на слайде</strong> — текст и визуал;</li>
+                <li><strong>Что говорит преподаватель</strong> — речь;</li>
+                <li><strong>Вопрос ученикам</strong> — для интерактива;</li>
+                <li><strong>Ответ</strong> — что должны сказать;</li>
+                <li><strong>Переход</strong> — к следующему слайду.</li>
+            </ul>
+            <p>Такой формат удобно копировать в PowerPoint / Google Slides / Canva.</p>
+
+            <h3 style="margin-top: 20px;">🎨 Легенда блоков</h3>
+            <div class="legend">
+                <div class="legend-item slide">
+                    <strong>📊 Что на слайде</strong>
+                    Текст, код или визуал для экрана.
+                </div>
+                <div class="legend-item speech">
+                    <strong>🎤 Речь преподавателя</strong>
+                    Что говорить во время слайда.
+                </div>
+                <div class="legend-item question">
+                    <strong>❓ Вопрос ученикам</strong>
+                    Что спросить для интерактива.
+                </div>
+                <div class="legend-item answer">
+                    <strong>✅ Ответ</strong>
+                    Что должны ответить ученики.
+                </div>
+                <div class="legend-item transition">
+                    <strong>➡️ Переход</strong>
+                    Как перейти к следующему слайду.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== БЫСТРАЯ НАВИГАЦИЯ ==================== -->
+    <section id="slides">
+        <h2 class="section-title">
+            <span>🎬</span> 20 слайдов разбора
+            <span class="count">нажмите на слайд</span>
+        </h2>
+
+        <div class="slides-nav">
+            <h3>⚡ Быстрый переход к слайду</h3>
+            <div class="grid">
+                <a href="#slide-1">1. Титульный</a>
+                <a href="#slide-2">2. Контекст</a>
+                <a href="#slide-3">3. Задачи</a>
+                <a href="#slide-4">4. Главная мысль</a>
+                <a href="#slide-5">5. Функции</a>
+                <a href="#slide-6">6. Почему эти</a>
+                <a href="#slide-7">7. Ручной: идея</a>
+                <a href="#slide-8">8. Ручной: код</a>
+                <a href="#slide-9">9. Разбор</a>
+                <a href="#slide-10">10. assert</a>
+                <a href="#slide-11">11. Тест с assert</a>
+                <a href="#slide-12">12. Сравнение</a>
+                <a href="#slide-13">13. Задание 1</a>
+                <a href="#slide-14">14. Задание 2</a>
+                <a href="#slide-15">15. Задание 3</a>
+                <a href="#slide-16">16. AssertionError</a>
+                <a href="#slide-17">17. Как мыслить</a>
+                <a href="#slide-18">18. Итоговая схема</a>
+                <a href="#slide-19">19. Главная мысль</a>
+                <a href="#slide-20">20. Вопросы</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== СЛАЙДЫ ==================== -->
+
+    <!-- СЛАЙД 1 -->
+    <div class="slide" id="slide-1">
+        <div class="slide-header">
+            <span class="slide-num">1</span>
+            <h3>Титульный</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <p>Практическая работа №1<br>Тестирование простых функций в Python<br>Ручные проверки → <code>assert</code></p>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Сегодня мы начинаем тему, которая отличает «код, который работает» от «кода, которому можно доверять». Это тестирование. Мы начнём с самого простого — ручных проверок, а потом перейдём к <code>assert</code>.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Как вы думаете, что значит «протестировать функцию»?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Проверить, что она возвращает то, что должна, на разных входных данных.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Сегодня мы разберём это на пяти простых функциях.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 2 -->
+    <div class="slide" id="slide-2">
+        <div class="slide-header">
+            <span class="slide-num">2</span>
+            <h3>Где мы находимся</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>Теория: Тестирование и качество ПО
+   ↓
+Практика №1: ручные тесты → assert
+   ↓
+Дальше: pytest</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Мы уже прошли теорию: верификация, валидация, QA, QC, дефекты. Но теория без практики — это просто слова. Сегодня — первый шаг в реальное тестирование.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Чем тестирование отличается от «просто запустить программу»?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Запуск показывает, что программа не падает. Тестирование проверяет, что она даёт правильный результат.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>И начнём мы с самого простого — пяти функций.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 3 -->
+    <div class="slide" id="slide-3">
+        <div class="slide-header">
+            <span class="slide-num">3</span>
+            <h3>Что от нас хотят</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <ol>
+                    <li>Создать <code>functions.py</code> с 5 функциями.</li>
+                    <li>Написать ручные тесты (без <code>assert</code>).</li>
+                    <li>Написать тесты с <code>assert</code>.</li>
+                    <li>Специально сломать тест и посмотреть на <code>AssertionError</code>.</li>
+                </ol>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Обратите внимание на порядок. Сначала — вручную. Потом — через <code>assert</code>. Это не случайно. Если сразу дать <code>assert</code>, вы не поймёте, что внутри него происходит.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему сначала ручные тесты, а потом <code>assert</code>?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Чтобы понять механику: <code>assert</code> — это сокращение для ручной проверки.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Давайте посмотрим на функции, которые будем тестировать.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 4 -->
+    <div class="slide" id="slide-4">
+        <div class="slide-header">
+            <span class="slide-num">4</span>
+            <h3>Главная мысль практики</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <p style="font-size: 1.15em; font-weight: bold; color: #e94560;">Тестирование — это сравнение ожидаемого результата с фактическим.</p>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Запомните эту фразу. Всё тестирование сводится к одному: у нас есть ожидание, у нас есть факт, мы их сравниваем. Если совпало — тест пройден. Если нет — тест упал.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что такое «ожидаемый результат» и «фактический результат»?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Ожидаемый — то, что функция должна вернуть. Фактический — то, что она вернула на самом деле.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Теперь — к функциям.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 5 -->
+    <div class="slide" id="slide-5">
+        <div class="slide-header">
+            <span class="slide-num">5</span>
+            <h3>Функции для тестирования</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+
+def is_even(n):
+    return n % 2 == 0
+
+def reverse_string(s):
+    return s[::-1]
+
+def max_of_two(a, b):
+    if a &gt; b:
+        return a
+    return b</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Пять функций. Простые, но разные. <code>add</code> и <code>multiply</code> работают с числами. <code>is_even</code> возвращает логическое значение. <code>reverse_string</code> — строку. <code>max_of_two</code> — условная логика.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему мы тестируем именно такие функции?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Они простые, но покрывают разные типы данных и разные типы результатов.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Начнём с <code>add</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 6 -->
+    <div class="slide" id="slide-6">
+        <div class="slide-header">
+            <span class="slide-num">6</span>
+            <h3>Почему именно эти пять функций</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Функция</th>
+                            <th>Тип входа</th>
+                            <th>Тип выхода</th>
+                            <th>Что проверяем</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>add</code></td><td>числа</td><td>число</td><td>арифметика</td></tr>
+                        <tr><td><code>multiply</code></td><td>числа</td><td>число</td><td>умножение, ноль</td></tr>
+                        <tr><td><code>is_even</code></td><td>число</td><td>bool</td><td>логика</td></tr>
+                        <tr><td><code>reverse_string</code></td><td>строка</td><td>строка</td><td>работа со строками</td></tr>
+                        <tr><td><code>max_of_two</code></td><td>числа</td><td>число</td><td>условие</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Мы специально берём разные типы. Если бы все функции были про числа, мы бы не научились тестировать строки или логические значения.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что особенного в <code>is_even</code>?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Она возвращает <code>True</code> или <code>False</code>, а не число.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Теперь — первый тест. Вручную.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 7 -->
+    <div class="slide" id="slide-7">
+        <div class="slide-header">
+            <span class="slide-num">7</span>
+            <h3>Ручной тест: идея</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <ol>
+                    <li>Вызвать функцию</li>
+                    <li>Сохранить результат</li>
+                    <li>Сравнить с ожидаемым</li>
+                    <li>Напечатать сообщение</li>
+                </ol>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Это четыре шага любого теста. Сейчас мы делаем их вручную, чтобы вы увидели механику. Потом <code>assert</code> сделает то же самое, но короче.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему мы сохраняем результат в переменную, а не сравниваем сразу?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Чтобы можно было посмотреть, что именно вернула функция, если тест упадёт.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Вот как это выглядит в коде.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 8 -->
+    <div class="slide" id="slide-8">
+        <div class="slide-header">
+            <span class="slide-num">8</span>
+            <h3>Ручной тест: код</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>from functions import add
+
+def test_add():
+    result = add(2, 3)
+
+    if result != 5:
+        print("❌ Ошибка: add(2, 3) должно быть 5")
+    else:
+        print("✅ Тест пройден")
+
+test_add()</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Разберём по строкам. Импорт — берём функцию из другого файла. Функция <code>test_add</code> — это тест. Внутри — вызов, сравнение, вывод.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что произойдёт, если <code>add(2, 3)</code> вернёт не 5, а 6?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Напечатается «❌ Ошибка: add(2, 3) должно быть 5».</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Разберём каждую строку отдельно.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 9 -->
+    <div class="slide" id="slide-9">
+        <div class="slide-header">
+            <span class="slide-num">9</span>
+            <h3>Ручной тест: пошаговый разбор</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>from functions import add          # 1. Импорт
+def test_add():                    # 2. Создание теста
+    result = add(2, 3)             # 3. Вызов
+    if result != 5:                # 4. Сравнение
+        print("❌ Ошибка")         # 5. Ошибка
+    else:
+        print("✅ Тест пройден")   # 6. Успех
+test_add()                         # 7. Запуск</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Семь шагов. Каждый важен. Импорт — откуда берём функцию. Создание теста — что тестируем. Вызов — получаем факт. Сравнение — с ожиданием. Вывод — сообщаем результат. Запуск — без него тест не выполнится.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему без <code>test_add()</code> внизу тест не запустится?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Потому что Python выполняет код сверху вниз, но функцию нужно вызвать.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Теперь — то же самое, но через <code>assert</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 10 -->
+    <div class="slide" id="slide-10">
+        <div class="slide-header">
+            <span class="slide-num">10</span>
+            <h3>Что такое assert</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <p><code>assert</code> — это утверждение: «я утверждаю, что это истинно».<br>Если ложно — программа останавливается с <code>AssertionError</code>.</p>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p><code>assert</code> — это встроенное слово Python. Оно читается как утверждение. Мы не пишем «если не равно — ошибка». Мы пишем «утверждаю, что равно». Если это не так — Python сам сообщит.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Чем <code>assert add(2, 3) == 5</code> отличается от <code>if add(2, 3) != 5</code>?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Первое — утверждение, второе — условие. Первое короче и понятнее.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Вот как выглядит тест с <code>assert</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 11 -->
+    <div class="slide" id="slide-11">
+        <div class="slide-header">
+            <span class="slide-num">11</span>
+            <h3>Тест с assert</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>from functions import add
+
+def test_add():
+    assert add(2, 3) == 5
+    assert add(0, 0) == 0
+    assert add(-1, 1) == 0
+
+test_add()
+print("Все тесты пройдены!")</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Три строки вместо двенадцати. И каждая строка читается как утверждение: «<code>add(2, 3)</code> равно 5», «<code>add(0, 0)</code> равно 0», «<code>add(-1, 1)</code> равно 0».</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что произойдёт, если первый <code>assert</code> упадёт?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Программа остановится, остальные <code>assert</code> не выполнятся.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Сравним ручной тест и <code>assert</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 12 -->
+    <div class="slide" id="slide-12">
+        <div class="slide-header">
+            <span class="slide-num">12</span>
+            <h3>Ручной тест vs assert</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Критерий</th>
+                            <th>Ручной тест</th>
+                            <th><code>assert</code></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Проверка</td><td>вручную через <code>if</code></td><td>автоматически</td></tr>
+                        <tr><td>Ошибка</td><td>вручную через <code>print</code></td><td>автоматически</td></tr>
+                        <tr><td>Код</td><td>много</td><td>одна строка</td></tr>
+                        <tr><td>Читаемость</td><td>низкая</td><td>высокая</td></tr>
+                        <tr><td>Похожесть на настоящий тест</td><td>нет</td><td>да</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Посмотрите на таблицу. <code>assert</code> выигрывает по всем пунктам. Но ручные тесты нужны, чтобы понять, что происходит внутри. <code>assert</code> — это просто сокращение.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему <code>assert</code> — это шаг к pytest?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Потому что pytest использует <code>assert</code> внутри.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Теперь — самостоятельная работа.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 13 -->
+    <div class="slide" id="slide-13">
+        <div class="slide-header">
+            <span class="slide-num">13</span>
+            <h3>Задание 1. Ручные тесты</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <p>Создать <code>test_manual_more.py</code> с ручными тестами для:</p>
+                <ul>
+                    <li><code>multiply</code></li>
+                    <li><code>is_even</code></li>
+                    <li><code>reverse_string</code></li>
+                    <li><code>max_of_two</code></li>
+                </ul>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Вы уже видели ручной тест для <code>add</code>. Теперь сделайте то же самое для остальных четырёх функций. По три случая на каждую.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Какие случаи нужно проверить для <code>multiply</code>?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Обычное умножение, умножение на ноль, отрицательные числа.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>А теперь — те же тесты, но с <code>assert</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 14 -->
+    <div class="slide" id="slide-14">
+        <div class="slide-header">
+            <span class="slide-num">14</span>
+            <h3>Задание 2. Тесты с assert</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <p>Создать <code>test_assert_more.py</code>:</p>
+                <pre><code>def test_multiply():
+    assert multiply(2, 3) == 6
+    assert multiply(0, 5) == 0
+    assert multiply(-2, 3) == -6</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>То же самое, но короче. И не нужно вручную писать <code>print</code>. Python сам сообщит, если что-то не так.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему <code>assert is_even(4) == True</code>, а не просто <code>assert is_even(4)</code>?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Чтобы явно проверить, что функция вернула именно <code>True</code>, а не что-то другое.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>А теперь — самое интересное. Сломаем тест.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 15 -->
+    <div class="slide" id="slide-15">
+        <div class="slide-header">
+            <span class="slide-num">15</span>
+            <h3>Задание 3. Сломать тест</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>def test_broken():
+    assert add(2, 2) == 5  # специально неверно
+
+test_broken()</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Это специальное задание. Мы ломаем тест, чтобы увидеть <code>AssertionError</code>. Это важно: тест, который упал — это не катастрофа. Это сигнал, что тест работает.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Зачем специально ломать тест?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Чтобы увидеть, как выглядит ошибка, и перестать её бояться.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Вот что покажет Python.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 16 -->
+    <div class="slide" id="slide-16">
+        <div class="slide-header">
+            <span class="slide-num">16</span>
+            <h3>Как выглядит AssertionError</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <pre><code>Traceback (most recent call last):
+  File "test_broken.py", line 4, in &lt;module&gt;
+    test_broken()
+  File "test_broken.py", line 2, in test_broken
+    assert add(2, 2) == 5
+AssertionError</code></pre>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Читаем сверху вниз. <code>Traceback</code> — след ошибки. Файл и строка — где. Строка с <code>assert</code> — что именно упало. <code>AssertionError</code> — что не так.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что делать, если тест упал?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Понять, что не так: код или тест. Исправить. Запустить снова.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Теперь — как правильно мыслить при тестировании.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 17 -->
+    <div class="slide" id="slide-17">
+        <div class="slide-header">
+            <span class="slide-num">17</span>
+            <h3>Как мыслить при тестировании</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <ol>
+                    <li>Понять, что должна делать функция</li>
+                    <li>Определить ожидаемый результат</li>
+                    <li>Вызвать функцию</li>
+                    <li>Сравнить</li>
+                    <li>Повторить для разных случаев</li>
+                    <li>Если упало — разобраться</li>
+                </ol>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Это алгоритм тестирования. Он одинаков для любой функции. Сначала понимаем, что должно быть. Потом проверяем, что есть. Потом сравниваем.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что делать, если тест упал, а код правильный?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Значит, тест неправильный. Нужно исправить тест.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Подведём итоги.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 18 -->
+    <div class="slide" id="slide-18">
+        <div class="slide-header">
+            <span class="slide-num">18</span>
+            <h3>Итоговая схема практики</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <ol>
+                    <li><code>functions.py</code> — 5 функций</li>
+                    <li>Ручной тест для <code>add</code></li>
+                    <li>Тест с <code>assert</code> для <code>add</code></li>
+                    <li>Ручные тесты для остальных</li>
+                    <li>Тесты с <code>assert</code> для остальных</li>
+                    <li>Сломать тест → <code>AssertionError</code></li>
+                </ol>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Вот весь путь практики. От простого к сложному. От ручного к автоматическому.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Что мы поняли про тестирование?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Тест — это сравнение ожидаемого с фактическим.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>И главная мысль.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 19 -->
+    <div class="slide" id="slide-19">
+        <div class="slide-header">
+            <span class="slide-num">19</span>
+            <h3>Главная мысль</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <p style="font-size: 1.1em; font-weight: bold; color: #e94560;">Тестирование — это систематическая проверка того, что функция возвращает ожидаемый результат на разных входных данных.</p>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Запомните это. Тестирование — не «запустить и посмотреть». Это система: разные входы, ожидаемые выходы, сравнение.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Почему «программа запускается» — это ещё не качество?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Потому что она может запускаться, но считать неправильно.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Что дальше?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЛАЙД 20 -->
+    <div class="slide" id="slide-20">
+        <div class="slide-header">
+            <span class="slide-num">20</span>
+            <h3>Контрольные вопросы</h3>
+        </div>
+        <div class="slide-body">
+            <div class="block slide-content">
+                <span class="block-label">📊 Что на слайде</span>
+                <ol>
+                    <li>Что такое тестирование?</li>
+                    <li>Чем ручной тест отличается от <code>assert</code>?</li>
+                    <li>Что делает <code>assert</code>?</li>
+                    <li>Что такое крайний случай?</li>
+                    <li>Что делать, если тест упал?</li>
+                </ol>
+            </div>
+            <div class="block speech">
+                <span class="block-label">🎤 Речь преподавателя</span>
+                <p>Ответьте на эти вопросы. Если ответы есть — практика достигла цели.</p>
+            </div>
+            <div class="block question">
+                <span class="block-label">❓ Вопрос ученикам</span>
+                <p>Кто хочет ответить на первый вопрос?</p>
+            </div>
+            <div class="block answer">
+                <span class="block-label">✅ Ответ</span>
+                <p>Тестирование — это сравнение ожидаемого результата с фактическим.</p>
+            </div>
+            <div class="block transition">
+                <span class="block-label">➡️ Переход</span>
+                <p>Спасибо за работу.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ИТОГОВАЯ СХЕМА ==================== -->
+    <section id="scheme">
+        <h2 class="section-title"><span>🗺</span> Итоговая схема презентации</h2>
+
+        <div class="final-scheme">
+            <h3>📋 Все 20 слайдов</h3>
+            <ol>
+                <li><strong>Титульный</strong> — название практики</li>
+                <li><strong>Где мы находимся</strong> — контекст</li>
+                <li><strong>Что от нас хотят</strong> — задачи</li>
+                <li><strong>Главная мысль</strong> — идея тестирования</li>
+                <li><strong>Функции</strong> — что тестируем</li>
+                <li><strong>Почему эти функции</strong> — разнообразие типов</li>
+                <li><strong>Ручной тест: идея</strong> — 4 шага</li>
+                <li><strong>Ручной тест: код</strong> — пример</li>
+                <li><strong>Ручной тест: разбор</strong> — пошагово</li>
+                <li><strong>Что такое assert</strong> — определение</li>
+                <li><strong>Тест с assert</strong> — пример</li>
+                <li><strong>Сравнение</strong> — таблица</li>
+                <li><strong>Задание 1</strong> — ручные тесты</li>
+                <li><strong>Задание 2</strong> — тесты с assert</li>
+                <li><strong>Задание 3</strong> — сломать тест</li>
+                <li><strong>AssertionError</strong> — как выглядит</li>
+                <li><strong>Как мыслить</strong> — алгоритм</li>
+                <li><strong>Итоговая схема</strong> — весь путь</li>
+                <li><strong>Главная мысль</strong> — ключевая идея</li>
+                <li><strong>Контрольные вопросы</strong> — проверка</li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ==================== КОНТРОЛЬНЫЕ ВОПРОСЫ ==================== -->
+    <section id="questions">
+        <h2 class="section-title"><span>❓</span> Контрольные вопросы</h2>
+
+        <div class="final-questions">
+            <h3>🎯 Проверь себя</h3>
+            <ol>
+                <li>Что такое тестирование?</li>
+                <li>Чем ручной тест отличается от <code>assert</code>?</li>
+                <li>Что делает <code>assert</code>?</li>
+                <li>Что такое крайний случай?</li>
+                <li>Что делать, если тест упал?</li>
+            </ol>
+        </div>
+    </section>
+
+</div>
+
+<!-- ==================== ФУТЕР ==================== -->
+<footer>
+    <a href="practice-1.html" class="prev-link">← К практике №1</a>
+    <a href="index.html#materials" class="next-link">📚 Все материалы →</a>
+    <p style="margin-top: 20px;">Тестирование и автоматизация на Python · 110 часов</p>
+</footer>
+
+<!-- ==================== КНОПКА НАВЕРХ ==================== -->
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('open');
+    }
+
+    /* ===== КНОПКА НАВЕРХ ===== */
+    const toTop = document.getElementById('toTop');
+    window.addEventListener('scroll', () => {
+        toTop.classList.toggle('show', window.scrollY > 400);
+    });
+
+    /* ===== ПОДСВЕТКА АКТИВНОГО РАЗДЕЛА ===== */
+    const sections = document.querySelectorAll('section[id], .slide[id]');
+    const navLinks = document.querySelectorAll('#topnav a, .sidebar .side-section a');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                navLinks.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href === '#' + id) link.classList.add('active');
+                    else link.classList.remove('active');
+                });
+                localStorage.setItem('lastSection_practice1_review', id);
+            }
+        });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+
+    /* ===== ПРОДОЛЖИТЬ С... ===== */
+    window.addEventListener('load', () => {
+        const last = localStorage.getItem('lastSection_practice1_review');
+        if (last) {
+            const el = document.getElementById(last);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    /* ===== ESC ЗАКРЫВАЕТ SIDEBAR ===== */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
+    /* ===== СКАЧАТЬ PDF ===== */
+    function downloadPDF() {
+        setTimeout(() => window.print(), 100);
+    }
+</script>
+
+</body>
+</html>

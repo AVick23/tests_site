@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практика №1 — Тестирование простых функций в Python</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+        font-family: "Comic Sans MS", "Segoe UI", Arial, sans-serif;
+        background: #fdf6e3;
+        color: #1a1a2e;
+        line-height: 1.7;
+        padding-bottom: 80px;
+    }
+
+    /* ===== ЛИПКАЯ ШАПКА ===== */
+    .topbar {
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(26, 26, 46, 0.97);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 20px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+
+    .topbar .logo {
+        font-weight: bold; font-size: 1.05em;
+        color: #f0c929; text-decoration: none; white-space: nowrap;
+    }
+
+    .topbar .menu-btn {
+        background: transparent;
+        border: 2px solid #f0c929; color: #f0c929;
+        font-size: 1.2em; width: 40px; height: 40px;
+        border-radius: 10px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s; flex-shrink: 0;
+    }
+    .topbar .menu-btn:hover { background: rgba(240, 201, 41, 0.15); }
+
+    .topbar .topnav {
+        display: flex; gap: 6px; flex: 1;
+        overflow-x: auto; scrollbar-width: none;
+    }
+    .topbar .topnav::-webkit-scrollbar { display: none; }
+    .topbar .topnav a {
+        color: #cbd5e1; text-decoration: none;
+        padding: 6px 14px; border-radius: 20px;
+        font-size: 0.88em; white-space: nowrap;
+        transition: background 0.2s, color 0.2s;
+    }
+    .topbar .topnav a:hover,
+    .topbar .topnav a.active { background: #e94560; color: #fff; }
+
+    .topbar .pdf-btn {
+        background: #f0c929; color: #1a1a2e;
+        border: none; padding: 8px 16px; border-radius: 20px;
+        font-weight: bold; font-size: 0.85em;
+        cursor: pointer; white-space: nowrap;
+        font-family: inherit;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+    .topbar .pdf-btn:hover { transform: scale(1.05); }
+
+    .topbar .home-btn {
+        background: transparent;
+        border: 2px solid #94a3b8;
+        color: #cbd5e1;
+        padding: 7px 14px; border-radius: 20px;
+        text-decoration: none; font-size: 0.85em;
+        white-space: nowrap; transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .topbar .home-btn:hover {
+        border-color: #f0c929; color: #f0c929;
+    }
+
+    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+    .sidebar {
+        position: fixed; top: 0; left: -320px;
+        width: 300px; height: 100vh;
+        background: #1a1a2e; color: #fff;
+        padding: 25px 20px; z-index: 200;
+        overflow-y: auto; transition: left 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+    }
+    .sidebar.open { left: 0; }
+    .sidebar h3 {
+        color: #f0c929; font-size: 1.2em;
+        margin-bottom: 18px; padding-bottom: 10px;
+        border-bottom: 2px solid #e94560;
+    }
+    .sidebar .side-section { margin-bottom: 20px; }
+    .sidebar .side-section h4 {
+        color: #94a3b8; font-size: 0.75em;
+        text-transform: uppercase; letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+    .sidebar .side-section a {
+        display: block; color: #e2e8f0;
+        text-decoration: none; padding: 8px 12px;
+        border-radius: 8px; font-size: 0.9em;
+        margin-bottom: 2px;
+        transition: background 0.2s, padding-left 0.2s;
+    }
+    .sidebar .side-section a:hover { background: #0f3460; padding-left: 18px; }
+    .sidebar .side-section a.active { background: #e94560; color: #fff; font-weight: bold; }
+    .sidebar .close-btn {
+        position: absolute; top: 15px; right: 15px;
+        background: transparent; border: none;
+        color: #f0c929; font-size: 1.5em; cursor: pointer;
+    }
+    .sidebar .back-link {
+        display: block; margin-top: 10px;
+        background: #f0c929; color: #1a1a2e !important;
+        text-align: center; font-weight: bold;
+        padding: 10px !important;
+    }
+    .sidebar .back-link:hover { background: #e94560 !important; color: #fff !important; }
+
+    .overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.5); z-index: 150;
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* ===== КОНТЕЙНЕР ===== */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+    /* ===== ШАПКА-ГЕРОЙ ===== */
+    .hero {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 50%, #1e8449 100%);
+        color: #fff; padding: 55px 30px 65px;
+        text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+        content: "🧪"; position: absolute;
+        font-size: 200px; opacity: 0.1;
+        top: -40px; left: -30px; transform: rotate(-15deg);
+    }
+    .hero::after {
+        content: "✅"; position: absolute;
+        font-size: 180px; opacity: 0.1;
+        bottom: -50px; right: -20px; transform: rotate(10deg);
+    }
+    .hero .breadcrumb {
+        font-size: 0.85em; color: rgba(255,255,255,0.85);
+        margin-bottom: 15px; position: relative; z-index: 1;
+    }
+    .hero .breadcrumb a { color: #f0c929; text-decoration: none; }
+    .hero .breadcrumb a:hover { text-decoration: underline; }
+    .hero h1 {
+        font-size: 2.2em; margin-bottom: 10px;
+        text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+        position: relative; z-index: 1;
+    }
+    .hero .subtitle {
+        font-size: 1.1em; color: #fff;
+        position: relative; z-index: 1; opacity: 0.95;
+    }
+    .hero .meta {
+        display: flex; gap: 10px; justify-content: center;
+        flex-wrap: wrap; margin-top: 18px;
+        position: relative; z-index: 1;
+    }
+    .hero .meta span {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.35);
+        padding: 5px 14px; border-radius: 20px;
+        font-size: 0.85em; color: #fff;
+    }
+
+    /* ===== КНОПКА СКАЧАТЬ PDF (большая, под шапкой) ===== */
+    .pdf-cta {
+        background: #fff; border-radius: 20px;
+        padding: 22px 30px; margin-top: -40px;
+        position: relative; z-index: 2;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border-top: 6px solid #f0c929;
+        display: flex; align-items: center;
+        gap: 20px; flex-wrap: wrap;
+    }
+    .pdf-cta .icon {
+        font-size: 2.4em; flex-shrink: 0;
+    }
+    .pdf-cta .text {
+        flex: 1; min-width: 200px;
+    }
+    .pdf-cta .text h3 {
+        color: #0f3460; margin-bottom: 4px;
+        font-size: 1.15em;
+    }
+    .pdf-cta .text p {
+        color: #666; font-size: 0.9em;
+    }
+    .pdf-cta button {
+        background: #e94560; color: #fff;
+        border: none; padding: 14px 28px;
+        border-radius: 30px; font-weight: bold;
+        font-size: 1em; cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s, transform 0.2s;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        white-space: nowrap;
+    }
+    .pdf-cta button:hover {
+        background: #c73650;
+        transform: scale(1.05);
+    }
+
+    /* ===== БЫСТРЫЙ ПЕРЕХОД ===== */
+    .quick-jump {
+        background: #fff; border-radius: 20px;
+        padding: 22px 28px; margin-top: 25px;
+        position: relative; z-index: 2;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .quick-jump h3 {
+        color: #0f3460; margin-bottom: 12px; font-size: 1.05em;
+    }
+    .quick-jump .jump-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+    }
+    .quick-jump .jump-card {
+        background: #f8f9ff; border: 2px solid #e2e8f0;
+        border-radius: 12px; padding: 11px 14px;
+        text-decoration: none; color: #1a1a2e;
+        transition: all 0.2s;
+        display: flex; align-items: center; gap: 8px;
+        font-size: 0.88em; font-weight: 600;
+    }
+    .quick-jump .jump-card:hover {
+        border-color: #2ecc71; background: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(46, 204, 113, 0.15);
+    }
+    .quick-jump .jump-card .emoji { font-size: 1.2em; }
+
+    /* ===== СЕКЦИИ ===== */
+    section { scroll-margin-top: 90px; padding-top: 30px; }
+
+    .section-title {
+        font-size: 1.7em; color: #0f3460;
+        margin: 40px 0 20px;
+        padding-bottom: 10px;
+        border-bottom: 4px solid #2ecc71;
+        display: flex; align-items: center; gap: 12px;
+    }
+
+    /* ===== ВВОДНЫЙ БЛОК ===== */
+    .intro {
+        background: #fff; border-radius: 20px;
+        padding: 30px 35px; margin-top: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        border-left: 8px solid #2ecc71;
+    }
+    .intro p { font-size: 1.05em; margin-bottom: 12px; }
+    .intro .highlight {
+        background: #f0c929; padding: 2px 8px;
+        border-radius: 5px; font-weight: bold;
+    }
+    .intro ul, .intro ol {
+        margin: 12px 0 12px 25px;
+    }
+    .intro li { margin-bottom: 6px; }
+
+    /* ===== ЦЕЛИ ===== */
+    .goals {
+        background: linear-gradient(135deg, #e8f4f8 0%, #d4eaf2 100%);
+        border-radius: 15px;
+        padding: 22px 28px; margin: 20px 0;
+        border-left: 6px solid #0f3460;
+    }
+    .goals h4 {
+        color: #0f3460; margin-bottom: 12px;
+        font-size: 1.05em;
+    }
+    .goals ul { list-style: none; }
+    .goals li {
+        padding: 5px 0; font-size: 0.95em;
+    }
+    .goals li::before {
+        content: "🎯"; margin-right: 10px;
+    }
+
+    /* ===== КОД ===== */
+    pre {
+        background: #1a1a2e; color: #e2e8f0;
+        padding: 18px 22px; border-radius: 12px;
+        overflow-x: auto; margin: 15px 0;
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 0.88em; line-height: 1.55;
+        position: relative;
+    }
+    code {
+        font-family: "Consolas", "Monaco", monospace;
+        background: #e8f4f8; color: #c73650;
+        padding: 2px 7px; border-radius: 5px;
+        font-size: 0.9em;
+    }
+    pre code {
+        background: transparent; color: inherit; padding: 0;
+    }
+    .code-bad { border-left: 5px solid #e94560; }
+    .code-good { border-left: 5px solid #2ecc71; }
+    .code-label {
+        display: inline-block;
+        font-size: 0.75em; font-weight: bold;
+        padding: 3px 10px; border-radius: 20px;
+        margin-bottom: 8px; letter-spacing: 0.5px;
+    }
+    .code-label.bad { background: #e94560; color: #fff; }
+    .code-label.good { background: #2ecc71; color: #fff; }
+    .code-label.neutral { background: #0f3460; color: #fff; }
+
+    /* ===== КАРТОЧКИ ФУНКЦИЙ ===== */
+    .functions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px; margin-top: 20px;
+    }
+    .func-card {
+        background: #fff; border-radius: 15px;
+        padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-top: 5px solid #0f3460;
+        transition: transform 0.2s;
+    }
+    .func-card:hover { transform: translateY(-3px); }
+    .func-card h4 {
+        color: #0f3460; margin-bottom: 8px;
+        font-size: 1em; font-family: "Consolas", monospace;
+    }
+    .func-card p {
+        font-size: 0.88em; color: #555;
+        margin-bottom: 10px;
+    }
+    .func-card .example {
+        background: #f8f9ff; padding: 8px 12px;
+        border-radius: 8px; font-family: "Consolas", monospace;
+        font-size: 0.82em; color: #0f3460;
+    }
+
+    /* ===== АКЦЕНТ ===== */
+    .accent {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe8cc 100%);
+        border-left: 6px solid #f0c929;
+        border-radius: 0 15px 15px 0;
+        padding: 20px 26px; margin: 22px 0;
+        font-size: 1.05em;
+    }
+    .accent strong { color: #e94560; }
+
+    /* ===== МОЗГ ===== */
+    .brain-box {
+        background: #e8f4f8;
+        border: 3px dashed #0f3460;
+        border-radius: 15px;
+        padding: 22px 25px; margin: 25px 0;
+        position: relative;
+    }
+    .brain-box::before {
+        content: "🧠";
+        position: absolute; top: -18px; left: 20px;
+        font-size: 35px; background: #fdf6e3; padding: 0 8px;
+    }
+    .brain-box p { font-style: italic; color: #0f3460; margin-bottom: 8px; }
+    .brain-box p:last-child { margin-bottom: 0; }
+
+    /* ===== ШАГИ ===== */
+    .steps {
+        display: flex; flex-direction: column;
+        gap: 14px; margin-top: 20px;
+    }
+    .step {
+        background: #fff; border-radius: 15px;
+        padding: 20px 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        display: flex; gap: 18px;
+        border-left: 5px solid #2ecc71;
+    }
+    .step .step-num {
+        background: #2ecc71; color: #fff;
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 1.1em;
+        flex-shrink: 0;
+    }
+    .step .step-body { flex: 1; }
+    .step .step-body h4 {
+        color: #0f3460; margin-bottom: 8px;
+        font-size: 1.05em;
+    }
+    .step .step-body p { font-size: 0.95em; margin-bottom: 8px; }
+
+    /* ===== ТАБЛИЦЫ ===== */
+    .styled-table {
+        width: 100%; border-collapse: separate; border-spacing: 0;
+        margin-top: 20px; border-radius: 15px;
+        overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .styled-table th {
+        background: #0f3460; color: #fff;
+        padding: 14px 18px; text-align: left;
+        font-size: 0.95em;
+    }
+    .styled-table td {
+        background: #fff; padding: 13px 18px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.92em;
+    }
+    .styled-table tr:last-child td { border-bottom: none; }
+    .styled-table tr:hover td { background: #f8f9ff; }
+
+    /* ===== ЗАДАНИЯ ===== */
+    .task {
+        background: #fff; border-radius: 15px;
+        padding: 22px 26px; margin: 18px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-left: 5px solid #e94560;
+    }
+    .task h4 {
+        color: #e94560; margin-bottom: 10px;
+        font-size: 1.05em;
+    }
+    .task ol, .task ul {
+        margin: 10px 0 10px 25px;
+    }
+    .task li { margin-bottom: 6px; font-size: 0.95em; }
+
+    /* ===== Q&A ===== */
+    .qa-block {
+        background: #fff; border-radius: 15px;
+        padding: 20px 26px; margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .qa-block .question {
+        font-weight: bold; color: #e94560;
+        font-size: 1.02em; margin-bottom: 8px;
+    }
+    .qa-block .answer {
+        color: #333;
+        padding-left: 20px;
+        border-left: 3px solid #f0c929;
+    }
+
+    /* ===== ИТОГ ===== */
+    .result-box {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: #fff; border-radius: 20px;
+        padding: 30px 35px; margin: 30px 0;
+        box-shadow: 0 8px 30px rgba(46, 204, 113, 0.3);
+    }
+    .result-box h3 {
+        font-size: 1.3em; margin-bottom: 15px;
+    }
+    .result-box ul {
+        list-style: none; margin-top: 12px;
+    }
+    .result-box li {
+        padding: 6px 0; font-size: 1em;
+    }
+    .result-box li::before {
+        content: "✅"; margin-right: 10px;
+    }
+
+    /* ===== КНОПКА НАВЕРХ ===== */
+    .to-top {
+        position: fixed; bottom: 25px; right: 25px;
+        width: 50px; height: 50px; border-radius: 50%;
+        background: #e94560; color: #fff; border: none;
+        font-size: 1.4em; cursor: pointer;
+        box-shadow: 0 4px 20px rgba(233, 69, 96, 0.5);
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.3s, transform 0.2s; z-index: 90;
+    }
+    .to-top.show { opacity: 1; pointer-events: auto; }
+    .to-top:hover { transform: scale(1.1); }
+
+    /* ===== ФУТЕР ===== */
+    footer {
+        text-align: center;
+        padding: 50px 20px 20px;
+        color: #888; font-size: 0.9em;
+    }
+    footer .next-link,
+    footer .prev-link {
+        display: inline-block;
+        text-decoration: none; padding: 14px 34px;
+        border-radius: 30px; font-size: 1em;
+        font-weight: bold; margin-bottom: 12px;
+        transition: background 0.2s, transform 0.2s;
+        margin-right: 8px;
+    }
+    footer .next-link {
+        background: #e94560; color: #fff;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    }
+    footer .next-link:hover { background: #c73650; transform: scale(1.05); }
+    footer .prev-link {
+        background: #0f3460; color: #fff;
+    }
+    footer .prev-link:hover { background: #1a4a80; transform: scale(1.05); }
+
+    /* ===== АДАПТИВ ===== */
+    @media (max-width: 700px) {
+        .hero h1 { font-size: 1.5em; }
+        .hero .subtitle { font-size: 0.95em; }
+        .intro { padding: 22px 20px; }
+        .section-title { font-size: 1.35em; }
+        .topbar .topnav { display: none; }
+        .topbar .home-btn { display: none; }
+        .pdf-cta { padding: 18px 20px; }
+        .pdf-cta button { width: 100%; }
+        .styled-table th, .styled-table td { padding: 10px 12px; font-size: 0.85em; }
+        .step { flex-direction: column; gap: 12px; }
+    }
+
+    /* ===== ПЕЧАТЬ / PDF ===== */
+    @media print {
+        /* Скрываем всё лишнее */
+        .topbar, .sidebar, .overlay, .to-top,
+        .quick-jump, .pdf-cta button, footer,
+        .hero::before, .hero::after,
+        .brain-box::before { display: none !important; }
+
+        body {
+            background: #fff !important;
+            color: #000 !important;
+            font-family: "Segoe UI", Arial, sans-serif;
+            padding: 0 !important;
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 100%; padding: 0 15px; }
+
+        /* Герой — упрощённый */
+        .hero {
+            background: #fff !important;
+            color: #000 !important;
+            padding: 15px 0 10px !important;
+            border-bottom: 3px solid #000;
+            text-align: left !important;
+        }
+        .hero .breadcrumb {
+            color: #666 !important;
+            font-size: 9pt;
+            margin-bottom: 6px;
+        }
+        .hero .breadcrumb a { color: #666 !important; }
+        .hero h1 {
+            font-size: 20pt !important;
+            color: #000 !important;
+            text-shadow: none !important;
+            margin-bottom: 4px;
+        }
+        .hero .subtitle {
+            color: #333 !important;
+            font-size: 11pt !important;
+        }
+        .hero .meta {
+            justify-content: flex-start !important;
+            margin-top: 8px;
+        }
+        .hero .meta span {
+            background: #f0f0f0 !important;
+            border-color: #ccc !important;
+            color: #333 !important;
+            font-size: 9pt;
+        }
+
+        /* PDF CTA — упрощаем, оставляем как блок с текстом */
+        .pdf-cta {
+            background: #f9f9f9 !important;
+            box-shadow: none !important;
+            border: 1px solid #ccc;
+            border-top: 3px solid #000 !important;
+            margin-top: 15px !important;
+            padding: 12px 18px !important;
+            border-radius: 6px !important;
+        }
+        .pdf-cta .text h3 { font-size: 11pt; }
+        .pdf-cta .text p { font-size: 9pt; color: #666; }
+
+        /* Секции */
+        .section-title {
+            font-size: 14pt !important;
+            color: #000 !important;
+            border-bottom: 2px solid #000 !important;
+            margin: 15px 0 8px !important;
+            padding-bottom: 4px !important;
+            page-break-after: avoid;
+        }
+
+        /* Блоки */
+        .intro, .goals, .accent, .qa-block,
+        .task, .result-box, .brain-box {
+            box-shadow: none !important;
+            border-radius: 4px !important;
+            page-break-inside: avoid;
+            margin: 10px 0 !important;
+            padding: 12px 16px !important;
+        }
+        .intro {
+            border-left: 3px solid #000 !important;
+            background: #fff !important;
+        }
+        .goals {
+            background: #f9f9f9 !important;
+            border-left: 3px solid #000 !important;
+        }
+        .accent {
+            background: #f9f9f9 !important;
+            border-left: 3px solid #000 !important;
+        }
+        .brain-box {
+            background: #f9f9f9 !important;
+            border: 1px dashed #666 !important;
+        }
+        .brain-box::before {
+            display: inline !important;
+            position: static !important;
+            font-size: 1em;
+            content: "🧠 Мозг: ";
+        }
+
+        /* Код */
+        pre {
+            background: #f5f5f5 !important;
+            color: #000 !important;
+            border: 1px solid #ccc;
+            padding: 10px 14px !important;
+            font-size: 9pt;
+            page-break-inside: avoid;
+            border-radius: 4px !important;
+        }
+        code {
+            background: #f0f0f0 !important;
+            color: #000 !important;
+            border: 1px solid #ddd;
+        }
+
+        /* Карточки функций — в одну колонку */
+        .functions-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+        }
+        .func-card {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            border-top: 2px solid #000 !important;
+            padding: 12px 14px !important;
+            page-break-inside: avoid;
+        }
+
+        /* Шаги */
+        .step {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            border-left: 3px solid #000 !important;
+            padding: 12px 16px !important;
+            page-break-inside: avoid;
+        }
+        .step .step-num {
+            background: #000 !important;
+        }
+
+        /* Таблицы */
+        .styled-table {
+            box-shadow: none !important;
+            border: 1px solid #999;
+            page-break-inside: avoid;
+        }
+        .styled-table th {
+            background: #333 !important;
+            color: #fff !important;
+            padding: 8px 10px !important;
+            font-size: 9pt;
+        }
+        .styled-table td {
+            padding: 7px 10px !important;
+            font-size: 9pt;
+        }
+
+        /* Задания */
+        .task {
+            border-left: 3px solid #000 !important;
+            background: #f9f9f9 !important;
+        }
+
+        /* Итог */
+        .result-box {
+            background: #f0f0f0 !important;
+            color: #000 !important;
+            border: 2px solid #000 !important;
+        }
+        .result-box h3 { color: #000 !important; }
+
+        /* Q&A */
+        .qa-block .question { color: #000 !important; }
+        .qa-block .answer { border-left-color: #666 !important; }
+
+        /* Разрывы страниц */
+        section { page-break-inside: auto; }
+        h2, h3, h4 { page-break-after: avoid; }
+
+        /* Ссылки — не показывать URL */
+        a { color: #000 !important; text-decoration: none; }
+        a[href]::after { content: ""; }
+    }
+</style>
+</head>
+<body>
+
+<!-- ==================== ЛИПКАЯ ШАПКА ==================== -->
+<div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Меню">☰</button>
+    <a href="index.html" class="logo">🧪 Python Testing</a>
+    <nav class="topnav" id="topnav">
+        <a href="#goal" data-target="goal">Цель</a>
+        <a href="#functions" data-target="functions">Функции</a>
+        <a href="#manual" data-target="manual">Ручной тест</a>
+        <a href="#assert" data-target="assert">Assert</a>
+        <a href="#compare" data-target="compare">Сравнение</a>
+        <a href="#tasks" data-target="tasks">Задания</a>
+        <a href="#broken" data-target="broken">Сломать тест</a>
+        <a href="#qa" data-target="qa">Вопросы</a>
+    </nav>
+    <button class="pdf-btn" onclick="downloadPDF()">📥 Скачать PDF</button>
+    <a href="index.html" class="home-btn">🏠 Курс</a>
+</div>
+
+<!-- ==================== БОКОВАЯ ПАНЕЛЬ ==================== -->
+<aside class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">✕</button>
+    <h3>📚 Навигация</h3>
+
+    <div class="side-section">
+        <h4>Разделы практики</h4>
+        <a href="#goal">🎯 Цель практики</a>
+        <a href="#functions">📘 Функции для тестирования</a>
+        <a href="#manual">✍️ Ручной тест</a>
+        <a href="#assert">✅ Тест с assert</a>
+        <a href="#compare">⚖️ Ручной vs assert</a>
+        <a href="#tasks">📝 Задания</a>
+        <a href="#broken">💥 Сломать тест</a>
+        <a href="#qa">❓ Вопрос — ответ</a>
+        <a href="#result">🏁 Итог</a>
+    </div>
+
+    <div class="side-section">
+        <h4>Скачать</h4>
+        <a href="#" onclick="downloadPDF(); return false;" style="background:#f0c929; color:#1a1a2e; font-weight:bold; text-align:center;">📥 Скачать PDF</a>
+    </div>
+
+    <div class="side-section">
+        <h4>Курс</h4>
+        <a href="index.html" class="back-link">🏠 Вернуться к плану</a>
+    </div>
+</aside>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- ==================== ГЕРОЙ ==================== -->
+<div id="top"></div>
+<header class="hero">
+    <div class="breadcrumb">
+        <a href="index.html">Главная</a> → Модуль 1 → Практика №1
+    </div>
+    <h1>🧪 Практика №1: Тестирование простых функций</h1>
+    <p class="subtitle">Ручные проверки → <code style="background:rgba(255,255,255,0.2); color:#fff;">assert</code> → первые тесты</p>
+    <div class="meta">
+        <span>⏱ 4 академических часа</span>
+        <span>🐍 Python</span>
+        <span>🎯 Модуль 1</span>
+        <span>📥 PDF доступен</span>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- ==================== СКАЧАТЬ PDF ==================== -->
+    <div class="pdf-cta">
+        <span class="icon">📄</span>
+        <div class="text">
+            <h3>Сохранить практику в PDF</h3>
+            <p>Нажмите кнопку — откроется окно печати. Выберите «Сохранить как PDF».</p>
+        </div>
+        <button onclick="downloadPDF()">📥 Скачать PDF</button>
+    </div>
+
+    <!-- ==================== БЫСТРЫЙ ПЕРЕХОД ==================== -->
+    <div class="quick-jump">
+        <h3>⚡ Быстрый переход по практике</h3>
+        <div class="jump-grid">
+            <a href="#goal" class="jump-card"><span class="emoji">🎯</span> Цель</a>
+            <a href="#functions" class="jump-card"><span class="emoji">📘</span> Функции</a>
+            <a href="#manual" class="jump-card"><span class="emoji">✍️</span> Ручной тест</a>
+            <a href="#assert" class="jump-card"><span class="emoji">✅</span> Assert</a>
+            <a href="#compare" class="jump-card"><span class="emoji">⚖️</span> Сравнение</a>
+            <a href="#tasks" class="jump-card"><span class="emoji">📝</span> Задания</a>
+            <a href="#broken" class="jump-card"><span class="emoji">💥</span> Сломать тест</a>
+            <a href="#qa" class="jump-card"><span class="emoji">❓</span> Вопросы</a>
+        </div>
+    </div>
+
+    <!-- ==================== ЦЕЛЬ ==================== -->
+    <section id="goal">
+        <h2 class="section-title"><span>🎯</span> Цель практики</h2>
+
+        <div class="intro">
+            <p>Я хочу, чтобы вы научились писать тесты для функций:</p>
+            <ul>
+                <li>сначала <strong>вручную</strong> (без <code>assert</code> и без pytest),</li>
+                <li>затем с использованием <code>assert</code>,</li>
+                <li>поняли структуру теста,</li>
+                <li>и главное — смогли самостоятельно проверять несколько функций.</li>
+            </ul>
+            <p>Я буду рядом и всё покажу. Давайте начнём.</p>
+        </div>
+
+        <div class="goals">
+            <h4>После этой практики вы сможете:</h4>
+            <ul>
+                <li>объяснить, что такое тест и зачем он нужен;</li>
+                <li>написать ручной тест без assert;</li>
+                <li>переписать его через assert;</li>
+                <li>протестировать функции с разными типами данных;</li>
+                <li>специально сломать тест и прочитать AssertionError;</li>
+                <li>понять, почему assert — шаг к pytest.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ==================== ФУНКЦИИ ==================== -->
+    <section id="functions">
+        <h2 class="section-title"><span>📘</span> Часть 1. Исходные функции для тестирования</h2>
+
+        <p>Создайте файл <code>functions.py</code> и добавьте туда 5 простых функций:</p>
+
+        <pre><code>def add(a, b):
+    return a + b
+
+
+def multiply(a, b):
+    return a * b
+
+
+def is_even(n):
+    return n % 2 == 0
+
+
+def reverse_string(s):
+    return s[::-1]
+
+
+def max_of_two(a, b):
+    if a &gt; b:
+        return a
+    return b</code></pre>
+
+        <div class="brain-box">
+            <p><strong>Объяснение для вас:</strong> каждая функция делает что-то очень простое.</p>
+            <p>Эти функции идеально подходят для первых тестов. Я специально выбрал их, чтобы вы сосредоточились на механике тестирования, а не на сложной логике.</p>
+        </div>
+
+        <div class="functions-grid">
+            <div class="func-card">
+                <h4>add(a, b)</h4>
+                <p>Складывает два числа.</p>
+                <div class="example">add(2, 3) → 5</div>
+            </div>
+            <div class="func-card">
+                <h4>multiply(a, b)</h4>
+                <p>Умножает два числа.</p>
+                <div class="example">multiply(2, 3) → 6</div>
+            </div>
+            <div class="func-card">
+                <h4>is_even(n)</h4>
+                <p>Проверяет чётность числа.</p>
+                <div class="example">is_even(4) → True</div>
+            </div>
+            <div class="func-card">
+                <h4>reverse_string(s)</h4>
+                <p>Переворачивает строку.</p>
+                <div class="example">reverse_string("hi") → "ih"</div>
+            </div>
+            <div class="func-card">
+                <h4>max_of_two(a, b)</h4>
+                <p>Возвращает большее из двух чисел.</p>
+                <div class="example">max_of_two(3, 7) → 7</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== РУЧНОЙ ТЕСТ ==================== -->
+    <section id="manual">
+        <h2 class="section-title"><span>✍️</span> Часть 2. Как писать тесты вручную (без assert)</h2>
+
+        <p>Вот наш первый тест. Разберём его построчно, как будто вы впервые видите тесты.</p>
+
+        <pre><code>from functions import add
+
+def test_add():
+    result = add(2, 3)
+
+    if result != 5:
+        print("❌ Ошибка: add(2, 3) должно быть 5")
+    else:
+        print("✅ Тест пройден")
+
+test_add()</code></pre>
+
+        <div class="steps">
+
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h4>Импортируем функцию</h4>
+                    <pre style="margin: 8px 0;"><code>from functions import add</code></pre>
+                    <p>Говорим Python: «возьми функцию <code>add</code> из файла <code>functions.py</code>». Теперь можно вызывать <code>add()</code> внутри теста.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h4>Создаём тестовую функцию</h4>
+                    <pre style="margin: 8px 0;"><code>def test_add():</code></pre>
+                    <p>Имя <code>test_add</code> выбрано специально: <code>test_</code> — значит «это тест», <code>add</code> — значит «тестируем функцию add».</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h4>Вызываем функцию, которую тестируем</h4>
+                    <pre style="margin: 8px 0;"><code>result = add(2, 3)</code></pre>
+                    <p>Сохраняем результат в переменную <code>result</code>. Если функция работает правильно — там будет <code>5</code>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h4>Проверяем результат вручную</h4>
+                    <pre style="margin: 8px 0;"><code>if result != 5:</code></pre>
+                    <p>Сравниваем то, что вернула функция (факт), с тем, что мы <strong>ожидаем</strong>. Это ключевой момент: <em>тест — это сравнение ожидаемого с фактическим</em>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body">
+                    <h4>Сообщаем результат</h4>
+                    <pre style="margin: 8px 0;"><code>print("❌ Ошибка: ...")   # если неправильно
+print("✅ Тест пройден")   # если правильно</code></pre>
+                    <p>В реальных тестах так никто не делает — но новичку важно увидеть механику.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">6</div>
+                <div class="step-body">
+                    <h4>Запускаем тест</h4>
+                    <pre style="margin: 8px 0;"><code>test_add()</code></pre>
+                    <p>Без этого тест <strong>не запустится</strong>. Вручную тесты нужно запускать вручную. В pytest это будет делаться автоматически.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="accent">
+            <strong>Итог:</strong> тест берёт функцию, вызывает её, сравнивает результат с ожидаемым,
+            сообщает результат и запускается.
+        </div>
+    </section>
+
+    <!-- ==================== ASSERT ==================== -->
+    <section id="assert">
+        <h2 class="section-title"><span>✅</span> Часть 3. Как писать тесты с assert</h2>
+
+        <p>Тот же тест, но уже через <code>assert</code> — правильный, современный способ.</p>
+
+        <pre class="code-good"><code>from functions import add
+
+def test_add():
+    assert add(2, 3) == 5
+    assert add(0, 0) == 0
+    assert add(-1, 1) == 0
+
+test_add()
+print("Все тесты пройдены!")</code></pre>
+
+        <h3 style="color: #0f3460; margin: 25px 0 12px; font-size: 1.15em;">🧠 Что такое assert?</h3>
+
+        <div class="accent">
+            <code>assert</code> — это встроенное ключевое слово Python, которое означает:
+            <strong>«Проверь, что это выражение истинно. Если оно ложное — останови программу и сообщи об ошибке.»</strong>
+        </div>
+
+        <p>Когда Python видит:</p>
+        <pre><code>assert add(2, 3) == 5</code></pre>
+
+        <p>он делает:</p>
+        <ol style="margin: 10px 0 10px 25px;">
+            <li>вызывает функцию <code>add(2, 3)</code>,</li>
+            <li>получает результат, например <code>5</code>,</li>
+            <li>сравнивает его с ожидаемым <code>5</code>,</li>
+            <li>если совпало — идёт дальше,</li>
+            <li>если не совпало — делает <code>raise AssertionError</code>, и программа падает.</li>
+        </ol>
+
+        <h3 style="color: #0f3460; margin: 25px 0 12px; font-size: 1.15em;">🎯 Почему assert лучше ручных проверок?</h3>
+
+        <div class="brain-box">
+            <p><strong>Ручной тест:</strong> <code>if</code>, <code>print</code>, много строк, легко ошибиться.</p>
+            <p><strong>Assert:</strong> одна строка вместо четырёх, автоматическая проверка, автоматическая ошибка, читается как английский.</p>
+            <p><strong>Pytest — это просто надстройка над assert.</strong> Проверка остаётся такой же: <code>assert something == expected</code>.</p>
+        </div>
+    </section>
+
+    <!-- ==================== СРАВНЕНИЕ ==================== -->
+    <section id="compare">
+        <h2 class="section-title"><span>⚖️</span> Часть 4. Ручной тест vs assert</h2>
+
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Что сравниваем</th>
+                    <th>Ручные тесты</th>
+                    <th>assert</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Проверка результата</td>
+                    <td>вручную через <code>if</code></td>
+                    <td>автоматически</td>
+                </tr>
+                <tr>
+                    <td>Ошибка</td>
+                    <td>вручную через <code>print</code></td>
+                    <td>автоматически через <code>AssertionError</code></td>
+                </tr>
+                <tr>
+                    <td>Количество кода</td>
+                    <td>много</td>
+                    <td>одна строка</td>
+                </tr>
+                <tr>
+                    <td>Читаемость</td>
+                    <td>низкая</td>
+                    <td>высокая</td>
+                </tr>
+                <tr>
+                    <td>Похожесть на настоящие тесты</td>
+                    <td>нет</td>
+                    <td>да</td>
+                </tr>
+                <tr>
+                    <td>Основа pytest</td>
+                    <td>нет</td>
+                    <td>да</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="accent">
+            <strong>Главное понимание:</strong> ручные тесты нужны только для того, чтобы понять механику.
+            <code>assert</code> — это правильный, современный и удобный способ.
+            Pytest — это просто надстройка над assert.
+        </div>
+    </section>
+
+    <!-- ==================== ЗАДАНИЯ ==================== -->
+    <section id="tasks">
+        <h2 class="section-title"><span>📝</span> Часть 5. Задания для самостоятельной работы</h2>
+
+        <div class="task">
+            <h4>📝 Задание 1. Написать ручные тесты (без assert)</h4>
+            <p>Создайте файл <code>test_manual_more.py</code> и напишите тесты <strong>вручную</strong>, как мы делали в Части 2:</p>
+            <pre style="margin: 10px 0;"><code>result = multiply(2, 3)
+if result != 6:
+    print("Ошибка")
+else:
+    print("Ок")</code></pre>
+            <p><strong>Проверьте:</strong></p>
+            <ul>
+                <li><strong>multiply:</strong> обычное умножение, умножение на ноль, отрицательные числа.</li>
+                <li><strong>is_even:</strong> чётное → True, нечётное → False, ноль → True.</li>
+                <li><strong>reverse_string:</strong> "hello" → "olleh", пустая строка → пустая, один символ → он же.</li>
+                <li><strong>max_of_two:</strong> первое больше, второе больше, числа равны.</li>
+            </ul>
+        </div>
+
+        <div class="task">
+            <h4>📝 Задание 2. Написать тесты с assert</h4>
+            <p>Создайте файл <code>test_assert_more.py</code> и напишите те же тесты через <code>assert</code>:</p>
+            <pre style="margin: 10px 0;"><code>def test_multiply():
+    assert multiply(2, 3) == 6
+    assert multiply(0, 5) == 0
+    assert multiply(-2, 3) == -6</code></pre>
+            <p>Что важно понять:</p>
+            <ul>
+                <li><code>assert</code> делает проверку автоматически,</li>
+                <li>если тест неверный → программа падает,</li>
+                <li>если верный → идёт дальше,</li>
+                <li>тесты становятся короче и понятнее.</li>
+            </ul>
+        </div>
+
+        <div class="task">
+            <h4>📝 Задание 3. Специально сломать один тест</h4>
+            <p>Это очень важная часть обучения:</p>
+            <ol>
+                <li>выберите любую функцию,</li>
+                <li>напишите тест, который <strong>точно должен упасть</strong>,</li>
+                <li>запустите тест,</li>
+                <li>посмотрите, как выглядит <code>AssertionError</code>,</li>
+                <li>поймите, как Python показывает место ошибки.</li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ==================== СЛОМАТЬ ТЕСТ ==================== -->
+    <section id="broken">
+        <h2 class="section-title"><span>💥</span> Часть 6. Что происходит, когда тест падает</h2>
+
+        <p>Пример сломанного теста:</p>
+
+        <pre class="code-bad"><code>def test_broken():
+    assert add(2, 2) == 5  # специально неверно
+
+test_broken()</code></pre>
+
+        <p>Вы увидите:</p>
+
+        <pre><code>Traceback (most recent call last):
+  File "test_broken.py", line 4, in &lt;module&gt;
+    test_broken()
+  File "test_broken.py", line 2, in test_broken
+    assert add(2, 2) == 5
+AssertionError</code></pre>
+
+        <div class="brain-box">
+            <p><strong>Читаем сверху вниз:</strong></p>
+            <p><code>Traceback</code> — след ошибки. Файл и строка — где. Строка с <code>assert</code> — что упало. <code>AssertionError</code> — что не так.</p>
+            <p><strong>Зачем специально ломать тест?</strong> Чтобы увидеть ошибку, понять, как Python её показывает, и перестать бояться падений тестов. Тест, который упал — это не катастрофа. Это сигнал, что тест работает.</p>
+        </div>
+    </section>
+
+    <!-- ==================== Q&A ==================== -->
+    <section id="qa">
+        <h2 class="section-title"><span>❓</span> Часть 7. Вопрос — ответ</h2>
+
+        <div class="qa-block">
+            <div class="question">Что такое тестирование?</div>
+            <div class="answer">Сравнение ожидаемого результата с фактическим. Если совпало — тест пройден. Если нет — тест упал.</div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Почему сначала ручные тесты, а потом assert?</div>
+            <div class="answer">Чтобы понять механику: assert — это сокращение для ручной проверки. Если сразу дать assert, новичок не поймёт, что внутри него происходит.</div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Чем assert отличается от if?</div>
+            <div class="answer"><code>if add(2, 3) != 5</code> — это условие. <code>assert add(2, 3) == 5</code> — это утверждение. Первое требует дополнительного кода для ошибки, второе само останавливает программу.</div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Что произойдёт, если первый assert упадёт?</div>
+            <div class="answer">Программа остановится, остальные assert не выполнятся. AssertionError покажет, где именно.</div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Что делать, если тест упал?</div>
+            <div class="answer">Понять, что не так: код или тест. Исправить. Запустить снова. Если код правильный, а тест упал — значит, тест неправильный.</div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Почему assert — это шаг к pytest?</div>
+            <div class="answer">Потому что pytest использует assert внутри. Pytest просто делает выводы красивее, автоматически находит тесты и умеет параметризацию — но сердце всё то же: <code>assert something == expected</code>.</div>
+        </div>
+
+        <div class="qa-block">
+            <div class="question">Почему «программа запускается» — это ещё не качество?</div>
+            <div class="answer">Потому что она может запускаться, но считать неправильно. Тестирование проверяет не «запустилось ли», а «правильно ли».</div>
+        </div>
+    </section>
+
+    <!-- ==================== ИТОГ ==================== -->
+    <section id="result">
+        <h2 class="section-title"><span>🏁</span> Итог практики</h2>
+
+        <div class="result-box">
+            <h3>После выполнения этой практики вы:</h3>
+            <ul>
+                <li>понимаете механику тестирования,</li>
+                <li>умеете писать тесты вручную,</li>
+                <li>умеете писать тесты с assert,</li>
+                <li>умеете тестировать разные типы данных,</li>
+                <li>умеете читать AssertionError,</li>
+                <li>понимаете, зачем нужны тесты.</li>
+            </ul>
+        </div>
+
+        <div class="accent">
+            <strong>Главная мысль:</strong> тестирование — это систематическая проверка того, что функция
+            возвращает ожидаемый результат на разных входных данных.
+            Это не «запустить и посмотреть», а система: разные входы, ожидаемые выходы, сравнение.
+        </div>
+
+        <div class="brain-box">
+            <p><strong>Что дальше?</strong> Следующий шаг — <strong>pytest</strong>: структура проекта, автозапуск тестов, параметризация, фикстуры, отчёты.</p>
+            <p>Pytest использует то же самое <code>assert</code>, которое вы только что изучили. Так что вы уже готовы.</p>
+        </div>
+    </section>
+
+</div>
+
+<!-- ==================== ФУТЕР ==================== -->
+<footer>
+    <a href="index.html" class="prev-link">← К плану курса</a>
+    <a href="index.html#materials" class="next-link">📚 Все материалы →</a>
+    <p style="margin-top: 20px;">Тестирование и автоматизация на Python · 110 часов</p>
+</footer>
+
+<!-- ==================== КНОПКА НАВЕРХ ==================== -->
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('open');
+    }
+
+    /* ===== КНОПКА НАВЕРХ ===== */
+    const toTop = document.getElementById('toTop');
+    window.addEventListener('scroll', () => {
+        toTop.classList.toggle('show', window.scrollY > 400);
+    });
+
+    /* ===== ПОДСВЕТКА АКТИВНОГО РАЗДЕЛА ===== */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('#topnav a, .sidebar .side-section a');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                navLinks.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href === '#' + id) link.classList.add('active');
+                    else link.classList.remove('active');
+                });
+                localStorage.setItem('lastSection_practice1', id);
+            }
+        });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+
+    /* ===== ПРОДОЛЖИТЬ С... ===== */
+    window.addEventListener('load', () => {
+        const last = localStorage.getItem('lastSection_practice1');
+        if (last) {
+            const el = document.getElementById(last);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    /* ===== ESC ЗАКРЫВАЕТ SIDEBAR ===== */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
+    /* ===== СКАЧАТЬ PDF ===== */
+    function downloadPDF() {
+        // Небольшая задержка, чтобы при клике не было конфликта фокуса
+        setTimeout(() => window.print(), 100);
+    }
+</script>
+
+</body>
+</html>
